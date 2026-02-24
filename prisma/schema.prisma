@@ -1,19 +1,42 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
+
+// ============================================================================
+// User & Authentication
+// ============================================================================
+
+model User {
+  id            String    @id @default("uuid()")
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  avatarUrl     String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships OrganizationMember[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================================================
+// Organization & Membership
+// ============================================================================
 
 model Organization {
   id              String   @id @default(cuid())
   name            String
   slug            String   @unique
   logoUrl         String?
-  primaryColor    String   @default("#6366f1")
+  primaryColor    String   @default("#9317FD")
   industry        String?
   description     String?
   websiteUrl      String?
@@ -21,20 +44,44 @@ model Organization {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  stripeCustomerId     String?  @unique
-  stripeSubscriptionId String?  @unique
-  stripePriceId        String?
+  stripeCustomerId       String?     @unique
+  stripeSubscriptionId   String?     @unique
+  stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
-  plan                 Plan     @default(FREE)
+  plan                   Plan        @default(FREE)
 
-  members    OrganizationMember[]
-  customers  Customer[]
-  campaigns  Campaign[]
-  messages   Message[]
-  pages      PublicPage[]
-  analytics  AnalyticsEvent[]
+  members           OrganizationMember[]
+  customers         Customer[]
+  campaigns         Campaign[]
+  messages          Message[]
+  pages             PublicPage[]
+  analytics         AnalyticsEvent[]
+  loyaltyConfigs    LoyaltyConfig[]
+  rewards           Reward[]
+  integrations      Integration[]
 
+  @@index([slug])
+  @@index([stripeCustomerId])
   @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String     @id @default(cuid())
+  organizationId String
+  userId         String
+  role           MemberRole @default(MEMBER)
+  invitedBy      String?
+  invitedAt      DateTime?  @default(now())
+  joinedAt       DateTime?  @default(now())
+  createdAt      DateTime   @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("organization_members")
 }
 
 enum Plan {
@@ -44,60 +91,78 @@ enum Plan {
   ENTERPRISE
 }
 
-model OrganizationMember {
-  id             String       @id @default(cuid())
-  organizationId String
-  userId         String
-  role           MemberRole   @default(MEMBER)
-  createdAt      DateTime     @default(now())
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, userId])
-  @@map("organization_members")
-}
-
 enum MemberRole {
   OWNER
   ADMIN
   MEMBER
 }
 
+// ============================================================================
+// Customer & Loyalty
+// ============================================================================
+
 model Customer {
   id             String    @id @default(cuid())
   organizationId String
+  externalId     String?   // External CRM ID
   email          String
   firstName      String?
   lastName       String?
   phone          String?
   points         Int       @default(0)
+  tier           String?   // Bronze, Silver, Gold, Platinum
   totalSpend     Float     @default(0)
   visitCount     Int       @default(0)
   tags           String[]
   metadata       Json?
+  unsubscribed   Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   lastVisitAt    DateTime?
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  messages     Message[]
-  pointsHistory PointsTransaction[]
+  organization    Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  messages        Message[]
+  pointsHistory   PointsTransaction[]
+  visits          Visit[]
+  rewardClaims    RewardClaim[]
+  badges          CustomerBadge[]
 
   @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([email])
+  @@index([phone])
   @@map("customers")
 }
 
 model PointsTransaction {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   customerId  String
   points      Int
   type        PointsType
+  source      String?     // visit, campaign, manual, referral
   description String?
-  createdAt   DateTime @default(now())
+  metadata    Json?
+  createdAt   DateTime    @default(now())
 
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
+  @@index([customerId])
+  @@index([type])
   @@map("points_transactions")
+}
+
+model Visit {
+  id             String   @id @default(cuid())
+  customerId     String
+  amount         Float    @default(0)
+  pointsEarned   Int      @default(0)
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("visits")
 }
 
 enum PointsType {
@@ -105,7 +170,110 @@ enum PointsType {
   REDEEM
   EXPIRE
   ADJUST
+  BONUS
 }
+
+// ============================================================================
+// Loyalty Configuration & Rewards
+// ============================================================================
+
+model LoyaltyConfig {
+  id                      String   @id @default(cuid())
+  organizationId          String
+  pointsPerVisit          Int      @default(10)
+  pointsPerEuro           Float    @default(1)
+  welcomeBonus            Int      @default(0)
+  referralBonus           Int      @default(0)
+  birthdayBonus           Int      @default(0)
+  pointsExpirationDays    Int?     // null = no expiration
+  minPointsForReward      Int      @default(100)
+  tierThresholds          Json?    // { "bronze": 0, "silver": 500, "gold": 1500, "platinum": 5000 }
+  isActive                Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId])
+  @@map("loyalty_configs")
+}
+
+model Reward {
+  id             String        @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  pointsRequired Int
+  type           RewardType
+  value          Float?        // Discount amount or percentage
+  imageUrl       String?
+  isActive       Boolean       @default(true)
+  quantity       Int?          // null = unlimited
+  claimedCount   Int           @default(0)
+  validFrom      DateTime?
+  validUntil     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  claims       RewardClaim[]
+
+  @@index([organizationId])
+  @@map("rewards")
+}
+
+model RewardClaim {
+  id         String        @id @default(cuid())
+  rewardId   String
+  customerId String
+  status     ClaimStatus   @default(PENDING)
+  code       String?       @unique // Redemption code
+  claimedAt  DateTime      @default(now())
+  redeemedAt DateTime?
+  expiresAt  DateTime?
+
+  reward   Reward   @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([rewardId, customerId, claimedAt])
+  @@index([customerId])
+  @@index([code])
+  @@map("reward_claims")
+}
+
+model CustomerBadge {
+  id         String   @id @default(cuid())
+  customerId String
+  badgeType  String
+  earnedAt   DateTime @default(now())
+  metadata   Json?
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, badgeType])
+  @@index([customerId])
+  @@map("customer_badges")
+}
+
+enum RewardType {
+  DISCOUNT_PERCENT
+  DISCOUNT_FIXED
+  FREE_PRODUCT
+  FREE_ITEM
+  CASHBACK
+  CUSTOM
+}
+
+enum ClaimStatus {
+  PENDING
+  REDEEMED
+  EXPIRED
+  CANCELLED
+}
+
+// ============================================================================
+// Campaigns & Messaging
+// ============================================================================
 
 model Campaign {
   id             String         @id @default(cuid())
@@ -117,17 +285,60 @@ model Campaign {
   channels       Channel[]
   subject        String?
   content        String
+  templateId     String?
   scheduledAt    DateTime?
   sentAt         DateTime?
+  completedAt    DateTime?
   targetTags     String[]
+  targetTiers    String[]
   minPoints      Int?
+  maxPoints      Int?
+  minVisits      Int?
+  lastVisitDays  Int?           // Target customers who visited X days ago
+  totalSent      Int            @default(0)
+  totalDelivered Int            @default(0)
+  totalOpened    Int            @default(0)
+  totalClicked   Int            @default(0)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   messages     Message[]
 
+  @@index([organizationId])
+  @@index([status])
   @@map("campaigns")
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  organizationId String
+  customerId     String
+  campaignId     String?
+  channel        Channel
+  subject        String?
+  content        String
+  status         MessageStatus @default(PENDING)
+  externalId     String?       // External message ID (Twilio, Resend)
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  bouncedAt      DateTime?
+  failedReason   String?
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  campaign     Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([campaignId])
+  @@index([status])
+  @@index([externalId])
+  @@map("messages")
 }
 
 enum CampaignType {
@@ -152,31 +363,9 @@ enum Channel {
   WHATSAPP
 }
 
-model Message {
-  id             String        @id @default(cuid())
-  organizationId String
-  customerId     String
-  campaignId     String?
-  channel        Channel
-  subject        String?
-  content        String
-  status         MessageStatus @default(PENDING)
-  sentAt         DateTime?
-  deliveredAt    DateTime?
-  openedAt       DateTime?
-  clickedAt      DateTime?
-  metadata       Json?
-  createdAt      DateTime      @default(now())
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  campaign     Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-
-  @@map("messages")
-}
-
 enum MessageStatus {
   PENDING
+  QUEUED
   SENT
   DELIVERED
   OPENED
@@ -184,6 +373,10 @@ enum MessageStatus {
   BOUNCED
   FAILED
 }
+
+// ============================================================================
+// Public Pages & Analytics
+// ============================================================================
 
 model PublicPage {
   id             String   @id @default(cuid())
@@ -193,13 +386,17 @@ model PublicPage {
   description    String?
   content        Json
   isActive       Boolean  @default(true)
+  isPublished    Boolean  @default(false)
+  publishedAt    DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   analyticsEvents AnalyticsEvent[]
 
   @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([slug])
   @@map("public_pages")
 }
 
@@ -208,13 +405,55 @@ model AnalyticsEvent {
   organizationId String
   pageId         String?
   eventType      String
+  eventName      String?
   properties     Json?
   sessionId      String?
   visitorId      String?
+  userAgent      String?
+  ipAddress      String?
+  referrer       String?
   createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   page         PublicPage?  @relation(fields: [pageId], references: [id], onDelete: SetNull)
 
+  @@index([organizationId])
+  @@index([eventType])
+  @@index([createdAt])
   @@map("analytics_events")
+}
+
+// ============================================================================
+// Integrations
+// ============================================================================
+
+model Integration {
+  id             String           @id @default(cuid())
+  organizationId String
+  type           IntegrationType
+  name           String
+  config         Json             // Encrypted configuration
+  isActive       Boolean          @default(true)
+  lastSyncAt     DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, type])
+  @@index([organizationId])
+  @@map("integrations")
+}
+
+enum IntegrationType {
+  GOOGLE_BUSINESS
+  FACEBOOK
+  INSTAGRAM
+  SHOPIFY
+  WOOCOMMERCE
+  SQUARE
+  STRIPE
+  ZAPIER
+  WEBHOOK
+  CUSTOM
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { Plan } from "@prisma/client";
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object;
+        const invoice = event.data.object as Stripe.Invoice;
         if (invoice.subscription) {
           const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
           const org = await prisma.organization.findFirst({
