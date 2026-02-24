@@ -1,13 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface User {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  avatarUrl?: string;
-}
+import type { User } from "@supabase/supabase-js";
 
 interface AuthState {
   user: User | null;
@@ -15,7 +8,7 @@ interface AuthState {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
-  logout: () => void;
+  clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -31,7 +24,7 @@ export const useAuthStore = create<AuthState>()(
           isLoading: false,
         }),
       setLoading: (loading) => set({ isLoading: loading }),
-      logout: () =>
+      clearAuth: () =>
         set({
           user: null,
           isAuthenticated: false,
@@ -41,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "fidelyz-auth",
       partialize: (state) => ({
-        user: state.user,
+        // Only persist minimal info, auth state is managed by Supabase
         isAuthenticated: state.isAuthenticated,
       }),
     }
