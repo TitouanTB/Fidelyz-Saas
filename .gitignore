@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+*.lcov
 
 # next.js
 /.next/
@@ -19,10 +20,16 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
 *.pem
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
 # debug
 npm-debug.log*
@@ -31,7 +38,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
+.env*.local
+.env.production
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +49,44 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma
+prisma/*.db
+prisma/*.db-journal
+
+# logs
+logs/
+*.log
+
+# cache
+.cache/
+.parcel-cache/
+
+# uploads (if using local file storage)
+uploads/
+public/uploads/
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+# Redis dump
+dump.rdb
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
