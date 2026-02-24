@@ -5,3 +5,5 @@ export { twilioClient, sendSMS, sendWhatsApp, sendBulkSMS } from "./twilio";
 export { resend, sendEmail, sendBulkEmail, sendTemplateEmail } from "./resend";
 export { genAI, model, generateCampaignSuggestion, analyzeCustomerData, generateEmailContent } from "./ai";
 export { cn, formatCurrency, formatDate, formatRelativeDate, generateSlug, truncate, getInitials } from "./utils";
+export { createClient, getSupabaseBrowserClient, getAuthUser, getAuthSession, signOut } from "./supabase";
+export type { SupabaseClient, User, Session } from "./supabase";

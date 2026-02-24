@@ -37,17 +37,19 @@ export async function POST(request: NextRequest) {
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as Stripe.Invoice;
-        if (invoice.subscription) {
-          const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+        const invoice = event.data.object as unknown as Record<string, unknown>;
+        const subscriptionId = invoice.subscription as string | undefined;
+        if (subscriptionId) {
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
           const org = await prisma.organization.findFirst({
             where: { stripeSubscriptionId: subscription.id },
           });
           if (org) {
+            const periodEnd = (subscription as unknown as Record<string, unknown>).current_period_end as number;
             await prisma.organization.update({
               where: { id: org.id },
               data: {
-                stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                stripeCurrentPeriodEnd: new Date(periodEnd * 1000),
               },
             });
           }

@@ -1,15 +1,11 @@
 "use client";
 
 import { Bell, Search } from "lucide-react";
-import { getInitials } from "@/lib/utils";
+import { UserDropdown } from "@/components/auth/user-dropdown";
+import { useAuthContext } from "@/components/providers/auth-provider";
 
-interface HeaderProps {
-  user?: { email?: string; user_metadata?: { full_name?: string } };
-}
-
-export function Header({ user }: HeaderProps) {
-  const name = user?.user_metadata?.full_name || user?.email || "User";
-  const initials = getInitials(name);
+export function Header() {
+  const { user, isLoading } = useAuthContext();
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10">
@@ -18,7 +14,7 @@ export function Header({ user }: HeaderProps) {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="search"
-            placeholder="Search..."
+            placeholder="Rechercher..."
             className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 w-64"
           />
         </div>
@@ -30,14 +26,7 @@ export function Header({ user }: HeaderProps) {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 rounded-full" />
         </button>
 
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-            <span className="text-indigo-700 text-xs font-semibold">{initials}</span>
-          </div>
-          <div className="text-sm">
-            <p className="font-medium text-gray-900">{name}</p>
-          </div>
-        </div>
+        {!isLoading && user && <UserDropdown user={user} />}
       </div>
     </header>
   );
