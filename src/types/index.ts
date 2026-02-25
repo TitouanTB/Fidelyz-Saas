@@ -33,8 +33,95 @@ export interface PageSection {
 
 export interface PageTheme {
   primaryColor: string;
-  fontFamily: string;
-  borderRadius: string;
+  secondaryColor: string;
+  accentColor: string;
+  fontFamily?: string;
+  borderRadius?: string;
+}
+
+export type PublicPageType = "mini-site" | "menu" | "rewards" | "portal";
+
+export interface MiniSiteContent {
+  hero?: {
+    headline: string;
+    subheadline: string;
+    ctaText: string;
+    backgroundImage?: string;
+  };
+  benefits?: Array<{
+    title: string;
+    description: string;
+    icon: string;
+  }>;
+  loyaltyProgram?: {
+    programName: string;
+    howItWorks: string[];
+    pointsPerPurchase: number;
+    welcomeBonus: number;
+    tierThresholds?: Record<string, number>;
+  };
+  cta?: {
+    heading: string;
+    description: string;
+    buttonText: string;
+  };
+  testimonials?: Array<{
+    name: string;
+    content: string;
+    rating: number;
+  }>;
+  features?: Array<{
+    title: string;
+    description: string;
+  }>;
+  contactInfo?: {
+    address?: string;
+    phone?: string;
+    hours?: string;
+    instagram?: string;
+    facebook?: string;
+  };
+}
+
+export interface DigitalMenuContent {
+  menuData?: {
+    products: Array<{
+      id?: string;
+      name: string;
+      description: string;
+      price: number;
+      category: string;
+      image?: string;
+      isVegetarian?: boolean;
+      isSpicy?: boolean;
+      isNew?: boolean;
+      isPopular?: boolean;
+      allergens?: string[];
+      variants?: Array<{ name: string; price: number }>;
+    }>;
+    categories: string[];
+    currency: string;
+    averagePrice?: number;
+  };
+  menuTheme?: {
+    layout: "grid" | "list";
+    showImages: boolean;
+    showPrices: boolean;
+  };
+}
+
+export interface CustomerPortalData {
+  id: string;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
+  points: number;
+  tier?: string | null;
+  totalSpend: number;
+  visitCount: number;
+  createdAt: string;
+  lastVisitAt?: string | null;
 }
 
 export interface MessageTemplate {
