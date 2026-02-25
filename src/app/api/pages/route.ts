@@ -9,7 +9,7 @@ const pageSchema = z.object({
   slug: z.string().optional(),
   description: z.string().optional(),
   pageType: z.enum(["mini-site", "menu", "rewards", "portal"]).default("mini-site"),
-  content: z.record(z.unknown()),
+  content: z.record(z.string(), z.unknown()),
   isActive: z.boolean().optional(),
   isPublished: z.boolean().optional(),
 });

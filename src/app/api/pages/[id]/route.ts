@@ -8,7 +8,7 @@ const pageUpdateSchema = z.object({
   slug: z.string().optional(),
   description: z.string().optional(),
   pageType: z.enum(["mini-site", "menu", "rewards", "portal"]).optional(),
-  content: z.record(z.unknown()).optional(),
+  content: z.record(z.string(), z.unknown()).optional(),
   isActive: z.boolean().optional(),
   isPublished: z.boolean().optional(),
 });

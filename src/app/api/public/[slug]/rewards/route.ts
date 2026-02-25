@@ -23,13 +23,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         where: {
           organizationId: page.organizationId,
           isActive: true,
-          OR: [
-            { validFrom: null },
-            { validFrom: { lte: new Date() } },
-          ],
-          OR: [
-            { validUntil: null },
-            { validUntil: { gte: new Date() } },
+          AND: [
+            {
+              OR: [
+                { validFrom: null },
+                { validFrom: { lte: new Date() } },
+              ],
+            },
+            {
+              OR: [
+                { validUntil: null },
+                { validUntil: { gte: new Date() } },
+              ],
+            },
           ],
         },
         orderBy: { pointsRequired: "asc" },

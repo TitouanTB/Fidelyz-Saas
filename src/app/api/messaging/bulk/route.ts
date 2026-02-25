@@ -12,7 +12,7 @@ const bulkSendSchema = z.object({
   content: z.string().min(1),
   campaignId: z.string().optional(),
   templateName: z.string().optional(),
-  templateData: z.record(z.unknown()).optional(),
+  templateData: z.record(z.string(), z.unknown()).optional(),
   enableFallback: z.boolean().default(true),
   priority: z.array(z.enum(["EMAIL", "SMS", "PUSH", "WHATSAPP", "WALLET"])).optional(),
 });
