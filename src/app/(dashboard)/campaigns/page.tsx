@@ -6,6 +6,9 @@ import { formatDate } from "@/lib/utils";
 import { Megaphone, Plus } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import type { Campaign, Channel } from "@prisma/client";
+
+type CampaignWithCount = Campaign & { _count: { messages: number } };
 
 export const metadata: Metadata = { title: "Campaigns - Fidelyz" };
 
@@ -26,7 +29,7 @@ export default async function CampaignsPage() {
   const member = await prisma.organizationMember.findFirst({ where: { userId: user.id } });
   if (!member) redirect("/onboarding");
 
-  const campaigns = await prisma.campaign.findMany({
+  const campaigns: CampaignWithCount[] = await prisma.campaign.findMany({
     where: { organizationId: member.organizationId },
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { messages: true } } },

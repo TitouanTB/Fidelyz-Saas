@@ -1,6 +1,8 @@
 export type { Organization, Customer, Campaign, Message, PublicPage, AnalyticsEvent, OrganizationMember } from "@prisma/client";
 export { Plan, MemberRole, CampaignType, CampaignStatus, Channel, MessageStatus, PointsType } from "@prisma/client";
 
+export * from "./analytics";
+
 export interface DashboardStats {
   totalCustomers: number;
   totalCampaigns: number;
