@@ -7,3 +7,22 @@ export { genAI, model, generateCampaignSuggestion, analyzeCustomerData, generate
 export { cn, formatCurrency, formatDate, formatRelativeDate, generateSlug, truncate, getInitials } from "./utils";
 export { createClient, getSupabaseBrowserClient, getAuthUser, getAuthSession, signOut } from "./supabase";
 export type { SupabaseClient, User, Session } from "./supabase";
+
+// Multi-channel messaging exports
+export {
+  CHANNEL_PRIORITY,
+  canUseChannel,
+  getAvailableChannels,
+  sortChannelsByPriority,
+  getBestChannel,
+  sendMessageWithFallback,
+  sendBulkMessages,
+  updateMessageStatus,
+  getMessagingStats,
+  retryFailedMessages,
+} from "./messaging";
+export type {
+  SendMessageParams,
+  CustomerChannelInfo,
+  SendResult,
+} from "./messaging";

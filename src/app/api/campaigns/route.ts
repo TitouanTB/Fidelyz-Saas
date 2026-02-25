@@ -7,12 +7,15 @@ const campaignSchema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
   type: z.enum(["ONE_TIME", "AUTOMATED", "RECURRING"]),
-  channels: z.array(z.enum(["EMAIL", "SMS", "PUSH", "WHATSAPP"])).min(1),
+  channels: z.array(z.enum(["EMAIL", "SMS", "PUSH", "WHATSAPP", "WALLET"])).min(1),
   subject: z.string().optional(),
   content: z.string().min(1),
   scheduledAt: z.string().datetime().optional().or(z.literal("")),
   targetTags: z.array(z.string()).optional(),
+  targetTiers: z.array(z.string()).optional(),
   minPoints: z.number().int().min(0).optional(),
+  maxPoints: z.number().int().min(0).optional(),
+  minVisits: z.number().int().min(0).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { scheduledAt, ...rest } = parsed.data;
+    const { scheduledAt, targetTags, targetTiers, ...rest } = parsed.data;
 
     const campaign = await prisma.campaign.create({
       data: {
@@ -60,7 +63,8 @@ export async function POST(request: NextRequest) {
         organizationId: member.organizationId,
         status: scheduledAt ? "SCHEDULED" : "DRAFT",
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-        targetTags: rest.targetTags || [],
+        targetTags: targetTags || [],
+        targetTiers: targetTiers || [],
       },
     });
 

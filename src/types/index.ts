@@ -40,7 +40,62 @@ export interface PageTheme {
 export interface MessageTemplate {
   subject?: string;
   content: string;
-  channel: "EMAIL" | "SMS" | "PUSH" | "WHATSAPP";
+  channel: "EMAIL" | "SMS" | "PUSH" | "WHATSAPP" | "WALLET";
+}
+
+// Multi-channel messaging types
+export interface MessagingChannelConfig {
+  channel: Channel;
+  enabled: boolean;
+  priority: number;
+  requiresFallback: boolean;
+}
+
+export interface CustomerChannelPreferences {
+  customerId: string;
+  preferredChannel: Channel;
+  walletEnabled: boolean;
+  whatsappOptIn: boolean;
+  smsOptIn: boolean;
+  emailOptIn: boolean;
+}
+
+export interface ChannelFallbackRule {
+  fromChannel: Channel;
+  toChannels: Channel[];
+  delayMs: number;
+  maxRetries: number;
+}
+
+export interface SendMessageRequest {
+  customerId: string;
+  channels: Channel[];
+  subject?: string;
+  content: string;
+  templateName?: string;
+  templateData?: Record<string, unknown>;
+  enableFallback?: boolean;
+  priority?: Channel[];
+}
+
+export interface SendMessageResponse {
+  success: boolean;
+  messageId?: string;
+  channel?: Channel;
+  externalId?: string;
+  error?: string;
+  fallbackUsed?: boolean;
+  attemptedChannels?: Channel[];
+}
+
+export interface MessagingStats {
+  total: number;
+  sent: number;
+  delivered: number;
+  opened: number;
+  clicked: number;
+  failed: number;
+  byChannel: Record<Channel, number>;
 }
 
 export interface AnalyticsPeriod {

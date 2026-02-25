@@ -312,23 +312,24 @@ model Campaign {
 }
 
 model Message {
-  id             String        @id @default(cuid())
-  organizationId String
-  customerId     String
-  campaignId     String?
-  channel        Channel
-  subject        String?
-  content        String
-  status         MessageStatus @default(PENDING)
-  externalId     String?       // External message ID (Twilio, Resend)
-  sentAt         DateTime?
-  deliveredAt    DateTime?
-  openedAt       DateTime?
-  clickedAt      DateTime?
-  bouncedAt      DateTime?
-  failedReason   String?
-  metadata       Json?
-  createdAt      DateTime      @default(now())
+  id               String        @id @default(cuid())
+  organizationId   String
+  customerId       String
+  campaignId       String?
+  channel          Channel
+  attemptedChannels Channel[]    // Track channels that were attempted
+  subject          String?
+  content          String
+  status           MessageStatus @default(PENDING)
+  externalId       String?       // External message ID (Twilio, Resend)
+  sentAt           DateTime?
+  deliveredAt      DateTime?
+  openedAt         DateTime?
+  clickedAt        DateTime?
+  bouncedAt        DateTime?
+  failedReason     String?
+  metadata         Json?
+  createdAt        DateTime      @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -362,6 +363,7 @@ enum Channel {
   SMS
   PUSH
   WHATSAPP
+  WALLET
 }
 
 enum MessageStatus {
