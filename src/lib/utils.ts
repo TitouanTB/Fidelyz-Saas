@@ -48,10 +48,15 @@ export function truncate(str: string, length: number): string {
 }
 
 export function getInitials(name: string): string {
-  return name
-    .split(" ")
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length === 0) return "";
+  if (parts.length === 1) {
+    const first = parts[0];
+    return (first[0] + (first[1] || first[0])).toUpperCase();
+  }
+  return parts
+    .slice(0, 2)
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
-    .slice(0, 2);
+    .toUpperCase();
 }
