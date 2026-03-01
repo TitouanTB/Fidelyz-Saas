@@ -41,6 +41,8 @@ model Organization {
   industry        String?
   description     String?
   websiteUrl      String?
+  whatsappNumber  String?  // WhatsApp Business number
+  googleReviewUrl String?  // Google Reviews link
   onboardingDone  Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -60,6 +62,11 @@ model Organization {
   loyaltyConfigs    LoyaltyConfig[]
   rewards           Reward[]
   integrations      Integration[]
+  menuCategories    MenuCategory[]
+  menuItems         MenuItem[]
+  qrScans           QRScan[]
+  aiSuggestions     AISuggestion[]
+  events            Event[]
 
   @@index([slug])
   @@index([stripeCustomerId])
@@ -103,30 +110,35 @@ enum MemberRole {
 // ============================================================================
 
 model Customer {
-  id             String    @id @default(cuid())
-  organizationId String
-  externalId     String?   // External CRM ID
-  email          String
-  firstName      String?
-  lastName       String?
-  phone          String?
-  points         Int       @default(0)
-  tier           String?   // Bronze, Silver, Gold, Platinum
-  totalSpend     Float     @default(0)
-  visitCount     Int       @default(0)
-  tags           String[]
-  metadata       Json?
-  unsubscribed   Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  lastVisitAt    DateTime?
+  id               String    @id @default(cuid())
+  organizationId   String
+  externalId       String?   // External CRM ID
+  email            String
+  firstName        String?
+  lastName         String?
+  phone            String?
+  points           Int       @default(0) // Legacy field - use visits instead
+  googleWalletPassId String? // Google Wallet Pass ID
+  personalPageToken String   @unique @default(cuid()) // Token for personal page
+  visits           Int       @default(0) // Number of visits for loyalty (replaces points)
+  streak           Int       @default(0) // Consecutive visits
+  lifetimeVisits   Int       @default(0) // Total lifetime visits
+  tier             String?   // Bronze, Silver, Gold, Platinum
+  totalSpend       Float     @default(0)
+  tags             String[]
+  metadata         Json?
+  unsubscribed     Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastVisitAt      DateTime?
 
   organization    Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   messages        Message[]
   pointsHistory   PointsTransaction[]
-  visits          Visit[]
+  visitRecords    Visit[]              // Renamed to avoid conflict with visits field
   rewardClaims    RewardClaim[]
   badges          CustomerBadge[]
+  qrScans         QRScan[]
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -187,7 +199,7 @@ model LoyaltyConfig {
   referralBonus           Int      @default(0)
   birthdayBonus           Int      @default(0)
   pointsExpirationDays    Int?     // null = no expiration
-  minPointsForReward      Int      @default(100)
+  visitsForReward         Int      @default(100) // Renamed from minPointsForReward
   tierThresholds          Json?    // { "bronze": 0, "silver": 500, "gold": 1500, "platinum": 5000 }
   isActive                Boolean  @default(true)
   createdAt               DateTime @default(now())
@@ -459,4 +471,142 @@ enum IntegrationType {
   ZAPIER
   WEBHOOK
   CUSTOM
+}
+
+// ============================================================================
+// QR Code Scanning
+// ============================================================================
+
+model QRScan {
+  id              String      @id @default(cuid())
+  organizationId  String
+  clientId        String?
+  type            QRCodeType
+  scannedAt       DateTime    @default(now())
+  userAgent       String?
+  ipAddress       String?
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client          Customer?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([scannedAt])
+  @@index([type])
+  @@map("qr_scans")
+}
+
+enum QRCodeType {
+  MENU
+  REWARD
+}
+
+// ============================================================================
+// AI Suggestions
+// ============================================================================
+
+model AISuggestion {
+  id             String              @id @default(cuid())
+  organizationId String
+  type           SuggestionType
+  priority       SuggestionPriority
+  title          String
+  description    String
+  action         String
+  expectedImpact String
+  status         SuggestionStatus    @default(PENDING)
+  appliedAt      DateTime?
+  createdAt      DateTime            @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("ai_suggestions")
+}
+
+enum SuggestionType {
+  REWARD_OPTIMIZATION
+  MESSAGING
+  MENU_HIGHLIGHT
+  PRICING
+}
+
+enum SuggestionPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum SuggestionStatus {
+  PENDING
+  APPLIED
+  DISMISSED
+}
+
+// ============================================================================
+// Digital Menu
+// ============================================================================
+
+model MenuCategory {
+  id              String       @id @default(cuid())
+  organizationId  String
+  name            String
+  order           Int          @default(0)
+  isVisible       Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  items        MenuItem[]
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id              String       @id @default(cuid())
+  categoryId      String
+  organizationId  String
+  name            String
+  description     String?
+  price           Decimal      @db.Decimal(10, 2)
+  imageUrl        String?
+  allergens       String[]
+  isAvailable     Boolean      @default(true)
+  order           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@index([organizationId])
+  @@map("menu_items")
+}
+
+// ============================================================================
+// Event Tracking
+// ============================================================================
+
+model Event {
+  id             String   @id @default(cuid())
+  organizationId String
+  clientId       String?
+  type           String   // qr_scan, reward_page_open, form_submitted, channel_selected, wallet_link_generated, wallet_added, pwa_install_prompted, pwa_installed, push_permission_granted, push_sent, push_clicked, whatsapp_inbound, whatsapp_reply_sent, reward_validated, reward_expired
+  eventName      String?
+  properties     Json?    // UTM params, device, etc.
+  sessionId      String?
+  visitorId      String?
+  userAgent      String?
+  ipAddress      String?
+  referrer       String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("events")
 }
