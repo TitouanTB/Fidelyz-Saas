@@ -35,6 +35,29 @@ export const sendWhatsApp = async (to: string, body: string) => {
   };
 };
 
+/**
+ * Send WhatsApp message from a restaurant's WhatsApp Business number
+ * This uses the restaurant's own WhatsApp number (via Twilio Embedded Signup Meta)
+ */
+export const sendWhatsAppFromRestaurant = async (
+  to: string,
+  body: string,
+  from: string
+) => {
+  const message = await twilioClient.messages.create({
+    body,
+    from: `whatsapp:${from}`,
+    to: `whatsapp:${to}`,
+  });
+
+  return {
+    sid: message.sid,
+    status: message.status,
+    to: message.to,
+    from: message.from,
+  };
+};
+
 export const sendBulkSMS = async (recipients: string[], body: string) => {
   const results = await Promise.allSettled(
     recipients.map((to) => sendSMS(to, body))

@@ -35,6 +35,7 @@ interface RewardFlowProps {
     slug: string;
     logoUrl?: string | null;
     primaryColor: string;
+    whatsappNumber?: string | null;
   };
   reward?: {
     id: string;
@@ -85,6 +86,9 @@ export function RewardFlow({
     customerId?: string;
   } | null>(null);
 
+  // Google Wallet link state
+  const [googleWalletUrl, setGoogleWalletUrl] = useState<string | null>(null);
+
   const primaryColor = organization.primaryColor || "#9317FD";
 
   // Detect Android
@@ -99,6 +103,28 @@ export function RewardFlow({
       return () => clearTimeout(timer);
     }
   }, [step]);
+
+  // Generate Google Wallet URL when customer ID is available
+  useEffect(() => {
+    if (claimResult?.customerId && isAndroid && formData.channel === "wallet") {
+      const fetchGoogleWalletUrl = async () => {
+        try {
+          const response = await fetch("/api/wallet/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ customerId: claimResult.customerId }),
+          });
+          const data = await response.json();
+          if (data.success && data.url) {
+            setGoogleWalletUrl(data.url);
+          }
+        } catch (error) {
+          console.error("Error generating Google Wallet URL:", error);
+        }
+      };
+      fetchGoogleWalletUrl();
+    }
+  }, [claimResult?.customerId, isAndroid, formData.channel]);
 
   const handleReviewResponse = useCallback((response: "positive" | "negative") => {
     setReviewResponse(response);
@@ -477,26 +503,28 @@ export function RewardFlow({
             )}
 
             <div className="space-y-3">
-              {hasWhatsApp && formData.phone && (
+              {hasWhatsApp && organization.whatsappNumber && (
                 <Button
                   size="lg"
                   className="w-full bg-[#25D366] hover:bg-[#25D366]/90"
                   onClick={() => {
-                    const message = encodeURIComponent(`Bonjour, je souhaite utiliser ma récompense: ${claimResult?.code || ""}`);
-                    window.open(`https://wa.me/${formData.phone.replace(/\D/g, "")}?text=${message}`, "_blank");
+                    const message = encodeURIComponent(`FIDELYZ-${organization.slug}`);
+                    const cleanWhatsAppNumber = organization.whatsappNumber.replace(/\D/g, "");
+                    window.open(`https://wa.me/${cleanWhatsAppNumber}?text=${message}`, "_blank");
                   }}
                 >
                   <MessageCircle className="w-5 h-5 mr-2" />
-                  Recevoir sur WhatsApp
+                  Activer ma carte sur WhatsApp
                 </Button>
               )}
 
-              {isAndroid && (
+              {isAndroid && googleWalletUrl && (
                 <Button
                   size="lg"
                   variant="outline"
                   className="w-full"
                   style={{ borderColor: primaryColor, color: primaryColor }}
+                  onClick={() => window.open(googleWalletUrl, "_blank")}
                 >
                   <Wallet className="w-5 h-5 mr-2" />
                   Ajouter à Google Wallet
