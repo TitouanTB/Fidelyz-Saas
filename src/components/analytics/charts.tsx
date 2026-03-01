@@ -282,7 +282,7 @@ export function PieChartWidget({
               borderRadius: "8px",
               boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
             }}
-            formatter={(value: number) => [value.toLocaleString(), ""]}
+            formatter={(value: number | undefined) => [value?.toLocaleString() ?? "", ""]}
           />
           {showLegend && <Legend />}
         </PieChart>
