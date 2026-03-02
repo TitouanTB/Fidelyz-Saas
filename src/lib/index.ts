@@ -1,7 +1,7 @@
 export { prisma } from "./prisma";
 export { stripe, PLANS, getStripePrice, createCheckoutSession, createBillingPortalSession, handleWebhookEvent } from "./stripe";
 export type { PlanKey } from "./stripe";
-export { twilioClient, sendSMS, sendWhatsApp, sendBulkSMS } from "./twilio";
+export { twilioClient, sendSMS, sendWhatsApp, sendWhatsAppFromRestaurant, sendBulkSMS } from "./twilio";
 export { resend, sendEmail, sendBulkEmail, sendTemplateEmail } from "./resend";
 export { genAI, model, generateCampaignSuggestion, analyzeCustomerData, generateEmailContent } from "./ai";
 export { cn, formatCurrency, formatDate, formatRelativeDate, generateSlug, truncate, getInitials } from "./utils";
@@ -26,3 +26,20 @@ export type {
   CustomerChannelInfo,
   SendResult,
 } from "./messaging";
+
+// Event tracking exports
+export {
+  createEvent,
+  getClientIP,
+  getUserAgent,
+} from "./events";
+export type {
+  CreateEventParams,
+} from "./events";
+
+// Google Wallet exports
+export {
+  generateGoogleWalletJWT,
+  isAndroidUserAgent,
+  isIOSUserAgent,
+} from "./wallet/google";

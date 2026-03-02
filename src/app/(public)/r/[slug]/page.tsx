@@ -63,8 +63,8 @@ export default async function RewardPage({ params }: Props) {
     welcomeBonus: organization.loyaltyConfigs[0].welcomeBonus,
   } : null;
 
-  // Check if WhatsApp is configured (via Twilio)
-  const hasWhatsApp = !!process.env.TWILIO_PHONE_NUMBER;
+  // Check if WhatsApp is enabled for this organization
+  const hasWhatsApp = !!organization.whatsappNumber && process.env.ENABLE_WHATSAPP === "true";
 
   // Get Google Review URL from integration
   const googleIntegration = organization.integrations[0];
@@ -79,6 +79,7 @@ export default async function RewardPage({ params }: Props) {
         slug: organization.slug,
         logoUrl: organization.logoUrl,
         primaryColor: organization.primaryColor,
+        whatsappNumber: organization.whatsappNumber,
       }}
       reward={reward}
       loyaltyConfig={loyaltyConfig}
