@@ -44,6 +44,7 @@ model Organization {
   whatsappNumber  String?  // WhatsApp Business number
   googleReviewUrl String?  // Google Reviews link
   onboardingDone  Boolean  @default(false)
+  metadata        Json?    // Editor settings, version history, etc.
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
