@@ -1,15 +1,23 @@
 import { prisma } from "@/lib/prisma";
 import { GoogleAuth } from "google-auth-library";
 import jwt from "jsonwebtoken";
-
-/**
- * Google Wallet Integration
- * Generates JWT tokens for Google Wallet Pass integration
- */
+import { featureFlags, isFeatureEnabled } from "./feature-flags";
 
 const GOOGLE_WALLET_ISSUER_ID = process.env.GOOGLE_WALLET_ISSUER_ID || "";
 const GOOGLE_WALLET_CLASS_ID = process.env.GOOGLE_WALLET_CLASS_ID || "";
 const GOOGLE_WALLET_SERVICE_ACCOUNT_KEY = process.env.GOOGLE_WALLET_SERVICE_ACCOUNT_KEY || "";
+
+/**
+ * Check if Google Wallet is available
+ */
+export const isGoogleWalletAvailable = (): boolean => {
+  return (
+    isFeatureEnabled("enableGoogleWallet") &&
+    !!GOOGLE_WALLET_ISSUER_ID &&
+    !!GOOGLE_WALLET_CLASS_ID &&
+    !!GOOGLE_WALLET_SERVICE_ACCOUNT_KEY
+  );
+};
 
 /**
  * Generate a Google Wallet JWT for adding a pass
@@ -19,22 +27,30 @@ export async function generateGoogleWalletJWT(
   organizationId: string,
   customerId: string
 ): Promise<{ success: boolean; jwt?: string; url?: string; error?: string }> {
+  // Check feature flag
+  if (!isFeatureEnabled("enableWallet") || !isFeatureEnabled("enableGoogleWallet")) {
+    return {
+      success: false,
+      error: "Google Wallet is disabled via feature flag",
+    };
+  }
+
+  // Check configuration
+  if (!GOOGLE_WALLET_ISSUER_ID || !GOOGLE_WALLET_CLASS_ID) {
+    return {
+      success: false,
+      error: "Google Wallet not configured",
+    };
+  }
+
+  if (!GOOGLE_WALLET_SERVICE_ACCOUNT_KEY) {
+    return {
+      success: false,
+      error: "Google Wallet service account key not configured",
+    };
+  }
+
   try {
-    // Check if Google Wallet is enabled
-    if (!GOOGLE_WALLET_ISSUER_ID || !GOOGLE_WALLET_CLASS_ID) {
-      return {
-        success: false,
-        error: "Google Wallet not configured",
-      };
-    }
-
-    if (!GOOGLE_WALLET_SERVICE_ACCOUNT_KEY) {
-      return {
-        success: false,
-        error: "Google Wallet service account key not configured",
-      };
-    }
-
     const customer = await prisma.customer.findUnique({
       where: { id: customerId },
       include: { organization: true },
@@ -148,3 +164,13 @@ export function isIOSUserAgent(userAgent?: string): boolean {
   if (!userAgent) return false;
   return /iphone|ipad|ipod/i.test(userAgent);
 }
+
+/**
+ * Check if wallet features are available
+ */
+export const isWalletAvailable = (): boolean => {
+  return isFeatureEnabled("enableWallet") && (
+    isGoogleWalletAvailable() || 
+    isFeatureEnabled("enableAppleWallet")
+  );
+};

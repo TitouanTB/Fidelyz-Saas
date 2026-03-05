@@ -12,6 +12,7 @@ import {
   CreditCard,
   Globe,
   LogOut,
+  Route,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +20,7 @@ import { useRouter } from "next/navigation";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/parcours", label: "Parcours Client", icon: Route },
   { href: "/customers", label: "Customers", icon: Users },
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/messages", label: "Messages", icon: MessageSquare },

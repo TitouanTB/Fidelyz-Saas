@@ -1,12 +1,67 @@
 import Stripe from "stripe";
+import { featureFlags, isFeatureEnabled } from "./feature-flags";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-01-28.clover",
-  typescript: true,
-});
+let stripeInstance: Stripe | null = null;
 
-export const PLANS = {
-  FREE: {
+/**
+ * Get Stripe instance with graceful degradation
+ * Returns null if Stripe is not configured or feature flag is disabled
+ */
+export function getStripe(): Stripe | null {
+  if (!isFeatureEnabled("enableBilling")) {
+    console.warn("Stripe is disabled via feature flag");
+    return null;
+  }
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.warn("Stripe secret key not configured");
+    return null;
+  }
+
+  if (!stripeInstance) {
+    try {
+      stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: "2026-01-28.clover",
+        typescript: true,
+      });
+    } catch (error) {
+      console.error("Failed to initialize Stripe:", error);
+      return null;
+    }
+  }
+
+  return stripeInstance;
+}
+
+/**
+ * Wrapper for Stripe operations with graceful degradation
+ */
+export async function withStripe<T>(
+  operation: (stripe: Stripe) => Promise<T>,
+  fallback: T
+): Promise<T> {
+  const stripe = getStripe();
+  
+  if (!stripe) {
+    console.warn("Stripe unavailable, using fallback");
+    return fallback;
+  }
+
+  try {
+    return await operation(stripe);
+  } catch (error) {
+    console.error("Stripe operation failed:", error);
+    return fallback;
+  }
+}
+
+// Get Stripe instance with graceful degradation
+// Use getStripe() for all new code
+export { getStripe, PLANS, isBillingAvailable, type PlanKey } from './stripe';
+
+// Legacy export for backward compatibility - prefer getStripe() in new code
+// This will return null if Stripe is not available
+export const stripe = null;
     name: "Free",
     price: 0,
     priceId: null,
@@ -85,6 +140,11 @@ export const createCheckoutSession = async (
   cancelUrl: string,
   metadata?: Record<string, string>
 ) => {
+  const stripe = getStripe();
+  if (!stripe) {
+    throw new Error("Stripe is not available");
+  }
+
   return stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
@@ -105,6 +165,11 @@ export const createBillingPortalSession = async (
   customerId: string,
   returnUrl: string
 ) => {
+  const stripe = getStripe();
+  if (!stripe) {
+    throw new Error("Stripe is not available");
+  }
+
   return stripe.billingPortal.sessions.create({
     customer: customerId,
     return_url: returnUrl,
@@ -116,6 +181,11 @@ export const createOrRetrieveCustomer = async (
   email: string,
   name?: string
 ) => {
+  const stripe = getStripe();
+  if (!stripe) {
+    throw new Error("Stripe is not available");
+  }
+
   const existingCustomer = await stripe.customers.list({
     email,
     limit: 1,
@@ -133,21 +203,35 @@ export const createOrRetrieveCustomer = async (
 };
 
 export const getSubscription = async (subscriptionId: string) => {
-  return stripe.subscriptions.retrieve(subscriptionId);
+  return withStripe(
+    async (stripe) => stripe.subscriptions.retrieve(subscriptionId),
+    null
+  );
 };
 
 export const cancelSubscription = async (subscriptionId: string) => {
-  return stripe.subscriptions.cancel(subscriptionId);
+  return withStripe(
+    async (stripe) => stripe.subscriptions.cancel(subscriptionId),
+    null
+  );
 };
 
 export const updateSubscription = async (
   subscriptionId: string,
   params: Stripe.SubscriptionUpdateParams
 ) => {
-  return stripe.subscriptions.update(subscriptionId, params);
+  return withStripe(
+    async (stripe) => stripe.subscriptions.update(subscriptionId, params),
+    null
+  );
 };
 
 export const createWebhookEvent = (payload: string, signature: string) => {
+  const stripe = getStripe();
+  if (!stripe) {
+    throw new Error("Stripe is not available");
+  }
+
   return stripe.webhooks.constructEvent(
     payload,
     signature,
@@ -156,10 +240,14 @@ export const createWebhookEvent = (payload: string, signature: string) => {
 };
 
 export const listInvoices = async (customerId: string, limit = 10) => {
-  return stripe.invoices.list({
-    customer: customerId,
-    limit,
-  });
+  return withStripe(
+    async (stripe) =>
+      stripe.invoices.list({
+        customer: customerId,
+        limit,
+      }),
+    { data: [], has_more: false }
+  );
 };
 
 export const handleWebhookEvent = async (event: Stripe.Event) => {
@@ -207,4 +295,9 @@ export const handleWebhookEvent = async (event: Stripe.Event) => {
     default:
       return { type: event.type, data: event.data.object };
   }
+};
+
+// Check if billing is available
+export const isBillingAvailable = (): boolean => {
+  return isFeatureEnabled("enableBilling") && !!process.env.STRIPE_SECRET_KEY;
 };

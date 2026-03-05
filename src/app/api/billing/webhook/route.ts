@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { stripe, PLANS } from "@/lib/stripe";
+import { getStripe, PLANS, isBillingAvailable } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { Plan } from "@prisma/client";
 
@@ -46,6 +46,15 @@ const getSubscriptionId = (invoice: any): string | null => {
 };
 
 export async function POST(request: NextRequest) {
+  if (!isBillingAvailable()) {
+    return NextResponse.json({ error: "Billing is not available" }, { status: 503 });
+  }
+
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+  }
+
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");
 

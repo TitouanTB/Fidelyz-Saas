@@ -1,6 +1,56 @@
 import { Resend } from "resend";
+import { featureFlags, isFeatureEnabled } from "./feature-flags";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendInstance: Resend | null = null;
+
+/**
+ * Get Resend client with graceful degradation
+ * Returns null if Resend is not configured or feature flag is disabled
+ */
+function getResendClient(): Resend | null {
+  if (!isFeatureEnabled("enableEmail")) {
+    console.warn("Email (Resend) is disabled via feature flag");
+    return null;
+  }
+
+  if (!process.env.RESEND_API_KEY) {
+    console.warn("Resend API key not configured");
+    return null;
+  }
+
+  if (!resendInstance) {
+    try {
+      resendInstance = new Resend(process.env.RESEND_API_KEY);
+    } catch (error) {
+      console.error("Failed to initialize Resend:", error);
+      return null;
+    }
+  }
+
+  return resendInstance;
+}
+
+/**
+ * Wrapper for Resend operations with graceful degradation
+ */
+async function withResend<T>(
+  operation: (resend: Resend) => Promise<{ data?: T; error?: { message: string } }>,
+  fallback: { data?: T; error?: { message: string } }
+): Promise<{ data?: T; error?: { message: string } }> {
+  const resend = getResendClient();
+
+  if (!resend) {
+    console.warn("Resend unavailable, using fallback");
+    return fallback;
+  }
+
+  try {
+    return await operation(resend);
+  } catch (error) {
+    console.error("Resend operation failed:", error);
+    return fallback;
+  }
+}
 
 interface SendEmailParams {
   to: string | string[];
@@ -15,41 +65,96 @@ interface SendTemplateEmailParams extends SendEmailParams {
   templateData: Record<string, unknown>;
 }
 
-export const sendEmail = async ({ to, subject, html, text, from }: SendEmailParams) => {
-  const { data, error } = await resend.emails.send({
-    from: from || process.env.EMAIL_FROM!,
-    to,
-    subject,
-    html,
-    text,
-  });
-
-  if (error) {
-    throw new Error(`Failed to send email: ${error.message}`);
+/**
+ * Send email with graceful degradation
+ */
+export const sendEmail = async ({
+  to,
+  subject,
+  html,
+  text,
+  from,
+}: SendEmailParams): Promise<{
+  success: boolean;
+  data?: unknown;
+  error?: string;
+}> => {
+  if (!isFeatureEnabled("enableEmail")) {
+    return { success: false, error: "Email is disabled" };
   }
 
-  return data;
-};
+  return withResend(
+    async (resend) => {
+      const result = await resend.emails.send({
+        from: from || process.env.EMAIL_FROM!,
+        to,
+        subject,
+        html,
+        text,
+      });
 
-export const sendBulkEmail = async (emails: SendEmailParams[]) => {
-  const results = await Promise.allSettled(
-    emails.map((email) => sendEmail(email))
-  );
+      if (result.error) {
+        return { error: { message: result.error.message } };
+      }
 
-  return results.map((result, index) => ({
-    to: emails[index].to,
-    success: result.status === "fulfilled",
-    data: result.status === "fulfilled" ? result.value : null,
-    error: result.status === "rejected" ? (result.reason as Error).message : null,
+      return { data: result.data };
+    },
+    { error: { message: "Email service unavailable" } }
+  ).then((result) => ({
+    success: !result.error,
+    data: result.data,
+    error: result.error?.message,
   }));
 };
 
+/**
+ * Send bulk email with graceful degradation
+ */
+export const sendBulkEmail = async (
+  emails: SendEmailParams[]
+): Promise<Array<{
+  to: string | string[];
+  success: boolean;
+  data: unknown;
+  error: string | null;
+}>> => {
+  if (!isFeatureEnabled("enableEmail")) {
+    return emails.map((email) => ({
+      to: email.to,
+      success: false,
+      data: null,
+      error: "Email is disabled",
+    }));
+  }
+
+  const results = await Promise.all(
+    emails.map(async (email) => {
+      const result = await sendEmail(email);
+      return {
+        to: email.to,
+        success: result.success,
+        data: result.data,
+        error: result.error || null,
+      };
+    })
+  );
+
+  return results;
+};
+
+/**
+ * Send template email with graceful degradation
+ */
 export const sendTemplateEmail = async ({
   to,
   subject,
   templateName,
   templateData,
-}: SendTemplateEmailParams) => {
+}: SendTemplateEmailParams): Promise<{
+  success: boolean;
+  data?: unknown;
+  error?: string;
+}> => {
   const templates: Record<string, (data: Record<string, unknown>) => string> = {
     welcome: (data) => `
       <h1>Welcome to ${data.appName || "Fidelyz"}!</h1>
@@ -72,7 +177,9 @@ export const sendTemplateEmail = async ({
     `,
   };
 
-  const html = templates[templateName]?.(templateData) || `
+  const html =
+    templates[templateName]?.(templateData) ||
+    `
     <h1>${subject}</h1>
     <p>${JSON.stringify(templateData)}</p>
   `;
@@ -80,4 +187,12 @@ export const sendTemplateEmail = async ({
   return sendEmail({ to, subject, html });
 };
 
-export { resend };
+// Export resend getter for advanced operations
+export const getResend = (): Resend | null => {
+  return getResendClient();
+};
+
+// Check if email is available
+export const isEmailAvailable = (): boolean => {
+  return isFeatureEnabled("enableEmail") && !!process.env.RESEND_API_KEY;
+};
