@@ -190,7 +190,21 @@ Cocher chaque élément après vérification :
 - [ ] Build réussi
 - [ ] Application accessible via l'URL Vercel
 
-### 4.5 Vérifications post-déploiement
+### 4.5 Configuration des Cron Jobs (⚠️ Important)
+
+> **Note** : Le plan Vercel Hobby est limité à **1 seul cron par jour**. Nous utilisons [cron-job.org](https://cron-job.org) comme alternative gratuite.
+
+- [ ] Variable `CRON_SECRET` configurée
+- [ ] Compte créé sur [cron-job.org](https://cron-job.org)
+- [ ] 5 jobs cron configurés (voir [CRON_SETUP.md](./CRON_SETUP.md) pour les détails)
+  - [ ] `/api/cron/send-campaigns` (toutes les heures)
+  - [ ] `/api/cron/reward-reminders` (tous les jours à 9h)
+  - [ ] `/api/cron/reactivate-inactive` (tous les lundis à 10h)
+  - [ ] `/api/cron/ai-suggestions` (tous les lundis à 8h)
+  - [ ] `/api/cron/reset-quotas` (1er du mois)
+- [ ] Header `Authorization: Bearer <CRON_SECRET>` configuré pour chaque job
+
+### 4.6 Vérifications post-déploiement
 - [ ] Page d'accueil charge correctement
 - [ ] Inscription/connexion utilisateur fonctionne
 - [ ] Authentification Supabase fonctionnelle
@@ -198,9 +212,9 @@ Cocher chaque élément après vérification :
 - [ ] Webhooks Stripe respondsant (si configuré)
 - [ ] Envoi d'emails fonctionne (si Resend configuré)
 - [ ] Envoi de SMS fonctionne (si Twilio configuré)
-- [ ] Cron jobs fonctionnels (si activés)
+- [ ] Cron jobs testés avec `curl` (voir [CRON_SETUP.md](./CRON_SETUP.md))
 
-### 4.6 Sécurité
+### 4.7 Sécurité
 - [ ] `NEXTAUTH_SECRET` généré et configuré
 - [ ] `JWT_SECRET` généré et configuré
 - [ ] `CRON_SECRET` configuré (pour les routes cron)
