@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendBulkMessages, CHANNEL_PRIORITY } from "@/lib/messaging";
+import { getEnabledChannels } from "@/lib/feature-flags";
 import { MessageStatus } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Check if messaging services are available
+  const enabledChannels = getEnabledChannels();
+  if (enabledChannels.length === 0) {
+    return NextResponse.json({
+      success: true,
+      skipped: true,
+      message: "No messaging services enabled",
+    });
   }
 
   try {
