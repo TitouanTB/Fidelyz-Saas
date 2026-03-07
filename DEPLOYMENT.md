@@ -128,8 +128,9 @@ npm run db:push
    - Output : Next.js (automatique)
 3. Ajoutez toutes les variables d'environnement dans le tableau Vercel.
 4. Renseignez `NEXT_PUBLIC_APP_URL` avec l'URL publique de l'application.
-5. Les cron jobs sont déjà définis dans `vercel.json`. Assurez-vous que `CRON_SECRET` est configuré, car chaque route cron exige l'en-tête `Authorization: Bearer <CRON_SECRET>`.
-6. Déployez.
+5. Déployez.
+
+> **Note sur les cron jobs** : Le plan Vercel Hobby est limité à 1 cron par jour. Nous utilisons [cron-job.org](https://cron-job.org) comme alternative gratuite pour exécuter les tâches planifiées. Voir la section [Cron jobs](#7-cron-jobs) ci-dessous.
 
 ## 6. Déploiement auto-hébergé (Node)
 
@@ -156,15 +157,24 @@ pm2 save
 
 ## 7. Cron jobs
 
-Les routes planifiées sont :
+> ⚠️ **Important** : Le plan Vercel Hobby est limité à **1 seul cron par jour**. Pour contourner cette limitation, nous utilisons [cron-job.org](https://cron-job.org) comme alternative gratuite et fiable.
 
-- `/api/cron/send-campaigns`
-- `/api/cron/reward-reminders`
-- `/api/cron/reactivate-inactive`
-- `/api/cron/ai-suggestions`
-- `/api/cron/reset-quotas`
+### Configuration via cron-job.org
 
-Chaque requête doit inclure `Authorization: Bearer <CRON_SECRET>`.
+1. Créez un compte sur [cron-job.org](https://cron-job.org)
+2. Configurez les 5 jobs suivants avec l'en-tête `Authorization: Bearer <CRON_SECRET>` :
+
+| Job | URL | Schedule | Description |
+|-----|-----|----------|-------------|
+| Envoi des campagnes | `/api/cron/send-campaigns` | `0 * * * *` | Toutes les heures |
+| Rappels de récompenses | `/api/cron/reward-reminders` | `0 9 * * *` | Tous les jours à 9h00 |
+| Réactivation clients inactifs | `/api/cron/reactivate-inactive` | `0 10 * * 1` | Tous les lundis à 10h00 |
+| Suggestions IA | `/api/cron/ai-suggestions` | `0 8 * * 1` | Tous les lundis à 8h00 |
+| Reset des quotas | `/api/cron/reset-quotas` | `0 0 1 * *` | Le 1er de chaque mois |
+
+3. Pour chaque job, configurez le header : `Authorization: Bearer <CRON_SECRET>`
+
+Pour les instructions détaillées, consultez [CRON_SETUP.md](./CRON_SETUP.md).
 
 ## 8. Vérifications post-déploiement
 
