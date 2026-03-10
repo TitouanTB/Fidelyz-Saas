@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { GoogleAuth } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import { featureFlags, isFeatureEnabled } from "./feature-flags";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 const GOOGLE_WALLET_ISSUER_ID = process.env.GOOGLE_WALLET_ISSUER_ID || "";
 const GOOGLE_WALLET_CLASS_ID = process.env.GOOGLE_WALLET_CLASS_ID || "";

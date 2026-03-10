@@ -1,7 +1,10 @@
 import Stripe from "stripe";
-import { featureFlags, isFeatureEnabled } from "./feature-flags";
+import { isFeatureEnabled } from "./feature-flags";
 
 let stripeInstance: Stripe | null = null;
+
+// Check if Stripe is available
+const isStripeEnabled = isFeatureEnabled("enableBilling") && !!process.env.STRIPE_SECRET_KEY;
 
 /**
  * Get Stripe instance with graceful degradation
@@ -55,13 +58,13 @@ export async function withStripe<T>(
   }
 }
 
-// Get Stripe instance with graceful degradation
-// Use getStripe() for all new code
-export { getStripe, PLANS, isBillingAvailable, type PlanKey } from './stripe';
-
 // Legacy export for backward compatibility - prefer getStripe() in new code
 // This will return null if Stripe is not available
-export const stripe = null;
+export const stripe = getStripe();
+
+// Plan definitions
+export const PLANS = {
+  FREE: {
     name: "Free",
     price: 0,
     priceId: null,

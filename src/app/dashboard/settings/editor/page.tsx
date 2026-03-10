@@ -18,14 +18,14 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Palette, Type, Sparkles, Award, Utensils, UserForm, QrCode, Bell, RefreshCw } from 'lucide-react';
+import { Palette, Type, Sparkles, Award, Utensils, User, QrCode, Bell, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EditorPage() {
   const editorStore = useEditorStore();
 
   // Custom hooks
-  const { autosaveStatus, lastSavedAt } = useAutosave();
+  const { autosaveStatus: hookAutosaveStatus, lastSavedAt: hookLastSavedAt } = useAutosave();
   const { regenerate, isRegenerating } = useAIRegenerate();
 
   // State
@@ -89,8 +89,8 @@ export default function EditorPage() {
 
     // UI
     previewMode,
-    autosaveStatus,
-    lastSavedAt,
+    autosaveStatus: storeAutosaveStatus,
+    lastSavedAt: storeLastSavedAt,
     versions,
     currentVersionIndex,
 
@@ -204,7 +204,7 @@ export default function EditorPage() {
                 currentVersionIndex={currentVersionIndex}
                 onRestore={restoreVersion}
               />
-              <AutosaveIndicator status={autosaveStatus} lastSavedAt={lastSavedAt} />
+              <AutosaveIndicator status={hookAutosaveStatus} lastSavedAt={hookLastSavedAt} />
             </div>
           </div>
 
@@ -465,7 +465,7 @@ export default function EditorPage() {
             {/* Formulaire Client Section */}
             <SectionCollapsible
               title="Formulaire Client"
-              icon={<UserForm className="h-5 w-5 text-indigo-600" />}
+              icon={<User className="h-5 w-5 text-indigo-600" />}
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

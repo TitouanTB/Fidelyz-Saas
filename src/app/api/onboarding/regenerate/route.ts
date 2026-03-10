@@ -16,9 +16,9 @@ const regenerateSchema = z.object({
   ]),
   organizationName: z.string().optional(),
   context: z.object({
-    industry?: string;
-    description?: string;
-    currentData?: z.record(z.any());
+    industry: z.string().optional(),
+    description: z.string().optional(),
+    currentData: z.record(z.any()).optional(),
   }).optional(),
 });
 
