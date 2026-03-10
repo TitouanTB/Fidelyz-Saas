@@ -39,7 +39,7 @@ interface CustomerPortalProps {
     points: number;
     tier?: string | null;
     totalSpend: number;
-    visitCount: number;
+    visits: number;
     createdAt: string;
     lastVisitAt?: string | null;
   };
@@ -238,7 +238,7 @@ export function CustomerPortal({
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Calendar className="w-4 h-4" style={{ color: primaryColor }} />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{customer.visitCount}</p>
+              <p className="text-2xl font-bold text-gray-900">{customer.visits}</p>
               <p className="text-xs text-gray-500">visites</p>
             </div>
             <div className="text-center">

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
           points: true,
           tier: true,
           totalSpend: true,
-          visitCount: true,
+          visits: true,
           createdAt: true,
           lastVisitAt: true,
         },
@@ -225,7 +225,7 @@ function generateCSVExport(data: {
         c.points,
         c.tier || "No Tier",
         c.totalSpend.toFixed(2),
-        c.visitCount,
+        c.visits,
         format(new Date(c.createdAt), "yyyy-MM-dd"),
         c.lastVisitAt ? format(new Date(c.lastVisitAt), "yyyy-MM-dd") : "",
       ].join(",")
@@ -473,7 +473,7 @@ function generatePDFExport(data: {
               <td>${c.points}</td>
               <td>${c.tier || "No Tier"}</td>
               <td>€${c.totalSpend.toFixed(2)}</td>
-              <td>${c.visitCount}</td>
+              <td>${c.visits}</td>
             </tr>
           `).join("")}
         </tbody>

@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
           organizationId: orgId,
           createdAt: { gte: start, lte: end },
         },
-        select: { id: true, points: true, totalSpend: true, visitCount: true, tier: true, createdAt: true },
+        select: { id: true, points: true, totalSpend: true, visits: true, tier: true, createdAt: true },
       }),
       // Previous period customers
       prisma.customer.count({
@@ -242,8 +242,8 @@ export async function GET(request: NextRequest) {
 
     // Calculate ROI
     const avgCustomerValue = totalCustomers > 0 ? customers.reduce((sum, c) => sum + c.totalSpend, 0) / totalCustomers : 0;
-    const avgVisitsPerCustomer = totalCustomers > 0 ? customers.reduce((sum, c) => sum + c.visitCount, 0) / totalCustomers : 0;
-    const retentionRate = totalCustomers > 0 ? (customers.filter((c) => c.visitCount > 1).length / totalCustomers) * 100 : 0;
+    const avgVisitsPerCustomer = totalCustomers > 0 ? customers.reduce((sum, c) => sum + c.visits, 0) / totalCustomers : 0;
+    const retentionRate = totalCustomers > 0 ? (customers.filter((c) => c.visits > 1).length / totalCustomers) * 100 : 0;
     
     // Estimate investment (loyalty program costs - rewards, messaging, etc.)
     const rewardsCost = rewardClaims.filter((r) => r.status === "REDEEMED").reduce((sum, r) => sum + (r.reward?.pointsRequired || 0), 0) * 0.01; // Assume 1 cent per point

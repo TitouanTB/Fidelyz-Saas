@@ -88,7 +88,7 @@ export default async function CustomerPortalPage({ params }: Props) {
         points: customer.points,
         tier: customer.tier,
         totalSpend: customer.totalSpend,
-        visitCount: customer.visitCount,
+        visits: customer.visits,
         createdAt: customer.createdAt.toISOString(),
         lastVisitAt: customer.lastVisitAt?.toISOString(),
       }}
