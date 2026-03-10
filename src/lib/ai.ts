@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { featureFlags, isFeatureEnabled } from "./feature-flags";
+import { isFeatureEnabled } from "./feature-flags";
 
 let genAI: GoogleGenerativeAI | null = null;
 
@@ -152,4 +152,123 @@ export const getAI = (): GoogleGenerativeAI | null => {
 // Check if AI is available
 export const isAIAvailable = (): boolean => {
   return isFeatureEnabled("enableAISuggestions") && !!process.env.GOOGLE_AI_API_KEY;
+};
+
+// Alias/wrapper functions for missing exports - these provide fallback behavior when AI is unavailable
+
+/**
+ * Extract menu items from text (placeholder)
+ */
+export const extractMenuFromText = async (text: string): Promise<{
+  success: boolean;
+  items?: Array<{ name: string; description: string; price?: number }>;
+  error?: string;
+}> => {
+  // Placeholder - would use AI to parse menu text
+  return { success: false, error: "Menu extraction not yet implemented" };
+};
+
+/**
+ * Extract menu items from URL (placeholder)
+ */
+export const extractMenuFromUrl = async (url: string): Promise<{
+  success: boolean;
+  items?: Array<{ name: string; description: string; price?: number }>;
+  error?: string;
+}> => {
+  // Placeholder - would scrape and parse menu from URL
+  return { success: false, error: "Menu extraction from URL not yet implemented" };
+};
+
+/**
+ * Get flash model for fast AI operations
+ */
+export const flashModel = (): GoogleGenerativeAI | null => {
+  return getGenAI();
+};
+
+/**
+ * Generate adapted rewards based on restaurant type
+ */
+export const generateAdaptedRewards = async (
+  restaurantType: string,
+  existingRewards: string[]
+): Promise<{
+  success: boolean;
+  rewards?: string[];
+  error?: string;
+}> => {
+  return withAI(
+    async (ai) => {
+      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `Generate 3 reward ideas for a ${restaurantType} restaurant. Existing rewards: ${existingRewards.join(", ")}. Return only the reward names, one per line.`;
+      const result = await model.generateContent(prompt);
+      const rewards = result.response.text().split("\n").filter(r => r.trim());
+      return { success: true, rewards };
+    },
+    { success: false, error: "AI service unavailable" }
+  );
+};
+
+/**
+ * Generate branding suggestions
+ */
+export const generateBrandingSuggestion = async (
+  restaurantName: string,
+  restaurantType: string
+): Promise<{
+  success: boolean;
+  suggestion?: { headline: string; colors: string[]; fonts: string[] };
+  error?: string;
+}> => {
+  return withAI(
+    async (ai) => {
+      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `Generate a branding suggestion for ${restaurantName}, a ${restaurantType}. Return JSON with: headline (max 60 chars), colors (3 hex codes), fonts (2 font names).`;
+      const result = await model.generateContent(prompt);
+      // Simple parsing - in production would use proper JSON parsing
+      const text = result.response.text();
+      try {
+        const parsed = JSON.parse(text);
+        return { success: true, suggestion: parsed };
+      } catch {
+        return { success: false, error: "Failed to parse AI response" };
+      }
+    },
+    { success: false, error: "AI service unavailable" }
+  );
+};
+
+/**
+ * Generate mini-site content
+ */
+export const generateMiniSiteContent = async (
+  restaurantName: string,
+  restaurantType: string,
+  industry?: string
+): Promise<{
+  success: boolean;
+  content?: {
+    heroHeadline: string;
+    heroSubtitle: string;
+    aboutTitle: string;
+    aboutParagraph: string;
+  };
+  error?: string;
+}> => {
+  return withAI(
+    async (ai) => {
+      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `Generate mini-site content for ${restaurantName}, a ${restaurantType}${industry ? ` in the ${industry} industry` : ''}. Return JSON with: heroHeadline (max 50 chars), heroSubtitle (max 100 chars), aboutTitle (max 40 chars), aboutParagraph (max 300 chars).`;
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      try {
+        const content = JSON.parse(text);
+        return { success: true, content };
+      } catch {
+        return { success: false, error: "Failed to parse AI response" };
+      }
+    },
+    { success: false, error: "AI service unavailable" }
+  );
 };

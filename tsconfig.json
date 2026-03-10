@@ -52,7 +52,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "node_modules/.prisma/client/index.d.ts"
   ],
   "exclude": [
     "node_modules"

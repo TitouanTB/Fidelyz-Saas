@@ -1,5 +1,20 @@
+// Re-export createServerClient and create isHTTPError helper
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+
+export { createServerClient };
+
+/**
+ * Check if an error is an HTTP error with status code
+ */
+export function isHTTPError(error: unknown): error is { status: number; message: string } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof (error as any).status === "number"
+  );
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

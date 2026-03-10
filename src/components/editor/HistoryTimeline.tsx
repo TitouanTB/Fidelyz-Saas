@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 
 interface Version {
@@ -48,7 +47,7 @@ export function HistoryTimeline({
             Les 10 dernières versions sont sauvegardées automatiquement
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="max-h-[400px]">
+        <div className="max-h-[400px] overflow-y-auto">
           <div className="space-y-2">
             {versions.length === 0 ? (
               <p className="text-sm text-gray-500 text-center py-8">
@@ -112,7 +111,7 @@ export function HistoryTimeline({
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
