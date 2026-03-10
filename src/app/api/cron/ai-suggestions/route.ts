@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         customers: {
           select: {
             totalSpend: true,
-            visitCount: true,
+            visits: true,
             points: true,
             tier: true,
           },

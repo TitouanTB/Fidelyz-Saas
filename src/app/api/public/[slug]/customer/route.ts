@@ -66,7 +66,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         points: customer.points,
         tier: customer.tier,
         totalSpend: customer.totalSpend,
-        visitCount: customer.visitCount,
+        visits: customer.visits,
         createdAt: customer.createdAt,
         lastVisitAt: customer.lastVisitAt,
       },

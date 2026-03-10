@@ -37,7 +37,7 @@ interface CustomerPortalContentProps {
     points: number;
     tier?: string | null;
     totalSpend: number;
-    visitCount: number;
+    visits: number;
     createdAt: string;
     lastVisitAt?: string | null;
   } | null;
@@ -167,7 +167,7 @@ export function CustomerPortalContent({
     },
     {
       label: "Visits",
-      value: customerData.visitCount,
+      value: customerData.visits,
       icon: Calendar,
       color: theme.secondaryColor,
     },

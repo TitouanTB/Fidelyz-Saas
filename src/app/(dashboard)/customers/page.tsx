@@ -91,7 +91,7 @@ export default async function CustomersPage() {
                     <td className="px-6 py-4 text-sm text-gray-700">
                       €{customer.totalSpend.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{customer.visitCount}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{customer.visits}</td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {customer.tags.slice(0, 2).map((tag) => (
