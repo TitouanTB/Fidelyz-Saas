@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendBulkMessages, CHANNEL_PRIORITY } from "@/lib/messaging";
 import { getEnabledChannels } from "@/lib/feature-flags";
-import { addDays, isBefore } from "date-fns";
+import { addDays } from "date-fns";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Check if messaging services are available
   const enabledChannels = getEnabledChannels();
   if (enabledChannels.length === 0) {
     return NextResponse.json({
@@ -24,7 +23,6 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const results = [];
 
-    // Find organizations with active loyalty programs
     const organizations = await prisma.organization.findMany({
       where: {
         loyaltyConfigs: {
@@ -39,9 +37,6 @@ export async function GET(request: NextRequest) {
     });
 
     for (const org of organizations) {
-      const loyaltyConfig = org.loyaltyConfigs[0];
-
-      // Find inactive customers (no visit in the last 30-60 days)
       const thirtyDaysAgo = addDays(now, -30);
       const sixtyDaysAgo = addDays(now, -60);
 
@@ -67,7 +62,7 @@ export async function GET(request: NextRequest) {
           messages: {
             none: {
               createdAt: {
-                gte: addDays(now, -7), // Don't spam - no reactivation message in last 7 days
+                gte: addDays(now, -7),
               },
               subject: {
                 contains: "On vous manque",
@@ -76,7 +71,7 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          visits: {
+          visitRecords: {
             orderBy: {
               createdAt: "desc",
             },
@@ -95,9 +90,8 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // Prepare personalized messages based on customer history
       const messagePromises = inactiveCustomers.map(async (customer) => {
-        const lastVisit = customer.visits[0]?.createdAt;
+        const lastVisit = customer.visitRecords[0]?.createdAt;
         const daysSinceLastVisit = lastVisit
           ? Math.floor(
               (now.getTime() - new Date(lastVisit).getTime()) /
@@ -105,17 +99,14 @@ export async function GET(request: NextRequest) {
             )
           : null;
 
-        // Create personalized message based on customer tier and history
         let subject = "On vous manque ! 💙";
         let content = `Bonjour ${customer.firstName || ""}, ça fait un moment que nous ne vous avons pas vu ! Nous avons de nouvelles récompenses qui vous attendent. Revenez nous voir bientôt !`;
 
-        // Special message for customers with high points
         if (customer.points >= 100) {
           subject = "Vos points vous attendent ! ⭐";
           content = `Bonjour ${customer.firstName || ""}, vous avez ${customer.points} points qui n'attendent que vous ! Profitez-en pour découvrir nos nouvelles récompenses. À très bientôt !`;
         }
 
-        // Special message for VIP/tier customers
         if (customer.tier && ["Gold", "Platinum"].includes(customer.tier)) {
           subject = "Une offre exclusive vous attend ✨";
           content = `Cher client VIP, nous avons préparé quelque chose de spécial pour vous. Votre fidélité mérite d'être récompensée ! Découvrez votre offre exclusive en magasin.`;
@@ -135,7 +126,6 @@ export async function GET(request: NextRequest) {
 
       const customersWithMessages = await Promise.all(messagePromises);
 
-      // Send messages in batches
       const BATCH_SIZE = 10;
       for (let i = 0; i < customersWithMessages.length; i += BATCH_SIZE) {
         const batch = customersWithMessages.slice(i, i + BATCH_SIZE);
@@ -144,7 +134,7 @@ export async function GET(request: NextRequest) {
           {
             organizationId: org.id,
             channels: ["EMAIL", "SMS", "WHATSAPP"],
-            subject: batch[0].subject, // Note: This sends same subject, individual content would require per-message sending
+            subject: batch[0].subject,
             content: batch[0].content,
             enableFallback: true,
             priority: CHANNEL_PRIORITY,
