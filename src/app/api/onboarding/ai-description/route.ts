@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { flashModel } from "@/lib/ai";
+import { getAI } from "@/lib/ai";
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -15,6 +14,12 @@ export async function POST(request: NextRequest) {
 
     if (!process.env.GOOGLE_AI_API_KEY) {
       const fallback = `Welcome to ${organizationName}'s loyalty program! Join us and earn exclusive rewards with every purchase. As a valued member of our ${industry} community, you'll enjoy special discounts, early access to new products, and personalized offers designed just for you.`;
+      return NextResponse.json({ description: fallback });
+    }
+
+    const ai = getAI();
+    if (!ai) {
+      const fallback = `Welcome to ${organizationName}'s loyalty program! Join us and earn exclusive rewards with every purchase.`;
       return NextResponse.json({ description: fallback });
     }
 
@@ -30,7 +35,8 @@ export async function POST(request: NextRequest) {
       Return only the description text, no additional formatting.
     `;
 
-    const result = await flashModel.generateContent(prompt);
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
     const description = result.response.text().trim();
 
     return NextResponse.json({ description });
