@@ -30,7 +30,7 @@ export function JourneySlideOver({
 
   const colorName = STAGE_COLORS[stage];
 
-  const getRecentItems = (d: Record<string, unknown>): unknown[] | null => {
+  const getRecentItems = (d: Record<string, unknown>): Record<string, unknown>[] | null => {
     const val =
       d.recentScans ??
       d.recentActivations ??
@@ -39,7 +39,7 @@ export function JourneySlideOver({
       d.recentVisits ??
       d.recentClaims ??
       d.recentExpirations;
-    return Array.isArray(val) ? val : null;
+    return Array.isArray(val) ? (val as Record<string, unknown>[]) : null;
   };
 
   const SKIPPED_KEYS = new Set([
@@ -144,45 +144,40 @@ export function JourneySlideOver({
                       {items.length === 0 ? (
                         <p className="text-sm text-gray-500">Aucun élément</p>
                       ) : (
-                        items
-                          .slice(0, 5)
-                          .map((item, idx) => {
-                            const row = item as Record<string, unknown>;
-                            return (
-                              <div
-                                key={idx}
-                                className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                        items.slice(0, 5).map((row, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {String(row.email ?? row.firstName ?? `Item ${idx + 1}`)}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {row.scannedAt
+                                  ? new Date(row.scannedAt as string).toLocaleDateString()
+                                  : row.claimedAt
+                                  ? new Date(row.claimedAt as string).toLocaleDateString()
+                                  : row.createdAt
+                                  ? new Date(row.createdAt as string).toLocaleDateString()
+                                  : ""}
+                              </p>
+                            </div>
+                            {!!row.status && (
+                              <span
+                                className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                  row.status === "PENDING"
+                                    ? "bg-amber-100 text-amber-700"
+                                    : row.status === "REDEEMED"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
                               >
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {String(row.email ?? row.firstName ?? `Item ${idx + 1}`)}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {row.scannedAt
-                                      ? new Date(row.scannedAt as string).toLocaleDateString()
-                                      : row.claimedAt
-                                      ? new Date(row.claimedAt as string).toLocaleDateString()
-                                      : row.createdAt
-                                      ? new Date(row.createdAt as string).toLocaleDateString()
-                                      : ""}
-                                  </p>
-                                </div>
-                                {row.status && (
-                                  <span
-                                    className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                      row.status === "PENDING"
-                                        ? "bg-amber-100 text-amber-700"
-                                        : row.status === "REDEEMED"
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-gray-100 text-gray-700"
-                                    }`}
-                                  >
-                                    {String(row.status)}
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })
+                                {String(row.status)}
+                              </span>
+                            )}
+                          </div>
+                        ))
                       )}
                     </div>
                   </div>
