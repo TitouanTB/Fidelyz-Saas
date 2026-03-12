@@ -14,25 +14,21 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
     const parsed = brandingSchema.safeParse(body);
-
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { organizationName, industry, description, websiteUrl } = parsed.data;
+    const { organizationName, industry } = parsed.data;
 
     const branding = await generateBrandingSuggestion(
       organizationName,
-      industry,
-      description,
-      websiteUrl || undefined
+      industry
     );
 
     return NextResponse.json({ branding });
