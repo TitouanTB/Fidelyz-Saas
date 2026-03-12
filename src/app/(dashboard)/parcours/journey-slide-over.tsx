@@ -30,6 +30,28 @@ export function JourneySlideOver({
 
   const colorName = STAGE_COLORS[stage];
 
+  const getRecentItems = (d: Record<string, unknown>): unknown[] | null => {
+    const val =
+      d.recentScans ??
+      d.recentActivations ??
+      d.recentWelcomeMessages ??
+      d.customers ??
+      d.recentVisits ??
+      d.recentClaims ??
+      d.recentExpirations;
+    return Array.isArray(val) ? val : null;
+  };
+
+  const SKIPPED_KEYS = new Set([
+    "recentScans",
+    "recentActivations",
+    "recentWelcomeMessages",
+    "customers",
+    "recentVisits",
+    "recentClaims",
+    "recentExpirations",
+  ]);
+
   return (
     <>
       {/* Backdrop */}
@@ -51,7 +73,7 @@ export function JourneySlideOver({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`bg-${colorName}-500 w-10 h-10 rounded-xl flex items-center justify-center`}>
-                <span className="text-white font-bold">{stats?.count || 0}</span>
+                <span className="text-white font-bold">{stats?.count ?? 0}</span>
               </div>
               <div>
                 <h2 className={`text-lg font-semibold text-${colorName}-700`}>
@@ -94,74 +116,78 @@ export function JourneySlideOver({
           {details ? (
             <div className="space-y-6">
               {/* Stats by Type */}
-              {Object.entries(details).map(([key, value]) => {
-                if (key === "recentScans" || key === "recentActivations" || 
-                    key === "recentWelcomeMessages" || key === "customers" ||
-                    key === "recentVisits" || key === "recentClaims" ||
-                    key === "recentExpirations") {
-                  return null; // Render these separately
-                }
-
-                return (
+              {Object.entries(details)
+                .filter(([key]) => !SKIPPED_KEYS.has(key))
+                .map(([key, value]) => (
                   <div key={key} className="bg-gray-50 rounded-xl p-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2 capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                      {key.replace(/([A-Z])/g, " $1").trim()}
                     </h3>
                     <p className="text-2xl font-bold text-gray-900">
-                      {typeof value === "number" ? value.toLocaleString() : String(value)}
+                      {typeof value === "number"
+                        ? value.toLocaleString()
+                        : String(value ?? "")}
                     </p>
                   </div>
-                );
-              })}
+                ))}
 
               {/* Recent Items */}
-              {(details.recentScans || details.recentActivations || 
-                details.recentWelcomeMessages || details.customers ||
-                details.recentVisits || details.recentClaims ||
-                details.recentExpirations) && (
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">
-                    Éléments récents
-                  </h3>
-                  <div className="space-y-2">
-                    {(() => {
-                      const items = details.recentScans || details.recentActivations || 
-                                   details.recentWelcomeMessages || details.customers ||
-                                   details.recentVisits || details.recentClaims ||
-                                   details.recentExpirations;
-                      if (!Array.isArray(items) || items.length === 0) {
-                        return <p className="text-sm text-gray-500">Aucun élément</p>;
-                      }
-                      return items.slice(0, 5).map((item: Record<string, unknown>, idx: number) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
-                        >
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {item.email as string || item.firstName as string || `Item ${idx + 1}`}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {item.scannedAt ? new Date(item.scannedAt as string).toLocaleDateString() : 
-                               item.claimedAt ? new Date(item.claimedAt as string).toLocaleDateString() :
-                               item.createdAt ? new Date(item.createdAt as string).toLocaleDateString() : ""}
-                            </p>
-                          </div>
-                          {item.status && (
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              item.status === "PENDING" ? "bg-amber-100 text-amber-700" :
-                              item.status === "REDEEMED" ? "bg-green-100 text-green-700" :
-                              "bg-gray-100 text-gray-700"
-                            }`}>
-                              {item.status}
-                            </span>
-                          )}
-                        </div>
-                      ));
-                    })()}
+              {(() => {
+                const items = getRecentItems(details);
+                if (!items) return null;
+                return (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">
+                      Éléments récents
+                    </h3>
+                    <div className="space-y-2">
+                      {items.length === 0 ? (
+                        <p className="text-sm text-gray-500">Aucun élément</p>
+                      ) : (
+                        items
+                          .slice(0, 5)
+                          .map((item, idx) => {
+                            const row = item as Record<string, unknown>;
+                            return (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                              >
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {String(row.email ?? row.firstName ?? `Item ${idx + 1}`)}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {row.scannedAt
+                                      ? new Date(row.scannedAt as string).toLocaleDateString()
+                                      : row.claimedAt
+                                      ? new Date(row.claimedAt as string).toLocaleDateString()
+                                      : row.createdAt
+                                      ? new Date(row.createdAt as string).toLocaleDateString()
+                                      : ""}
+                                  </p>
+                                </div>
+                                {row.status && (
+                                  <span
+                                    className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                      row.status === "PENDING"
+                                        ? "bg-amber-100 text-amber-700"
+                                        : row.status === "REDEEMED"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-700"
+                                    }`}
+                                  >
+                                    {String(row.status)}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Empty State */}
               {Object.keys(details).length === 0 && (
