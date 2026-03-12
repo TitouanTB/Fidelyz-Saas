@@ -1,5 +1,5 @@
-import { JourneyStage } from "@/app/(dashboard)/parcours/types";
-
+import { JourneyStage, JourneyStats } from "@/app/(dashboard)/parcours/types";
+export type { JourneyStage, JourneyStats };
 export interface JourneyConfig {
   stage: JourneyStage;
   title: string;
