@@ -8,7 +8,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -84,7 +84,7 @@ export default function NewCampaignPage() {
           )}
           <Input label="Campaign name *" placeholder="Summer Loyalty Boost" error={errors.name?.message} {...register("name")} />
           <Input label="Description" placeholder="Brief description of this campaign" {...register("description")} />
-          <Select
+          <NativeSelect
             label="Campaign type *"
             options={[
               { value: "ONE_TIME", label: "One-time" },

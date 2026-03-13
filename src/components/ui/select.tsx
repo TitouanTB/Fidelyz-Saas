@@ -4,7 +4,7 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Radix UI based Select components
-const SelectRoot = SelectPrimitive.Root;
+const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
 
@@ -151,7 +151,7 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
   options: { value: string; label: string }[];
 }
 
-const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+const NativeSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, error, label, id, options, ...props }, ref) => {
     const selectId = id || label?.toLowerCase().replace(/\s+/g, "-");
     return (
@@ -183,11 +183,11 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   }
 );
 
-Select.displayName = "Select";
+NativeSelect.displayName = "NativeSelect";
 
 export {
   Select,
-  SelectRoot,
+  NativeSelect,
   SelectGroup,
   SelectValue,
   SelectTrigger,

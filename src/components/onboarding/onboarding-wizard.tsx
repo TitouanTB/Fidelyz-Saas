@@ -8,7 +8,12 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+                <NativeSelect
+                  label="Industry"
+                  options={INDUSTRIES}
+                  error={errors.industry?.message}
+                  {...register("industry")}
+                />
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
