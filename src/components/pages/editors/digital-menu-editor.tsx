@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  SelectRoot,
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -186,7 +186,7 @@ export function DigitalMenuEditor({ content, onChange }: DigitalMenuEditorProps)
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Currency</Label>
-              <SelectRoot value={currency} onValueChange={(value) => updateMenuData({ currency: value })}>
+              <Select value={currency} onValueChange={(value) => updateMenuData({ currency: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -197,11 +197,11 @@ export function DigitalMenuEditor({ content, onChange }: DigitalMenuEditorProps)
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </SelectRoot>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Layout</Label>
-              <SelectRoot value={layout} onValueChange={(value: "grid" | "list") => updateMenuTheme({ layout: value })}>
+              <Select value={layout} onValueChange={(value: "grid" | "list") => updateMenuTheme({ layout: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -209,7 +209,7 @@ export function DigitalMenuEditor({ content, onChange }: DigitalMenuEditorProps)
                   <SelectItem value="grid">Grid</SelectItem>
                   <SelectItem value="list">List</SelectItem>
                 </SelectContent>
-              </SelectRoot>
+              </Select>
             </div>
           </div>
           <div className="flex gap-6">

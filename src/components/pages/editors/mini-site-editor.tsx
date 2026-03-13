@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  SelectRoot,
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -185,7 +185,7 @@ export function MiniSiteEditor({
                     onChange={(e) => updateBenefit(index, "title", e.target.value)}
                     placeholder="Benefit title"
                   />
-                  <SelectRoot
+                  <Select
                     value={benefit.icon}
                     onValueChange={(value) => updateBenefit(index, "icon", value)}
                   >
@@ -199,7 +199,7 @@ export function MiniSiteEditor({
                         </SelectItem>
                       ))}
                     </SelectContent>
-                  </SelectRoot>
+                  </Select>
                 </div>
                 <Input
                   value={benefit.description}
