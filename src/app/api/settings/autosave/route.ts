@@ -91,13 +91,14 @@ export async function POST(request: NextRequest) {
       select: { metadata: true },
     });
 
-    const currentMetadata = (organization?.metadata as Record<string, unknown>) || {};
+    const currentMetadata = (organization?.metadata as Record<string, any>) || {};
+    const editorMetadata = (currentMetadata.editor as Record<string, any>) || {};
 
     // Update editor settings in metadata
     const updatedMetadata = {
       ...currentMetadata,
       editor: {
-        ...currentMetadata.editor,
+        ...editorMetadata,
         ...parsed.data,
         lastSavedAt: new Date().toISOString(),
       },
