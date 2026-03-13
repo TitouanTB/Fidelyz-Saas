@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getAI } from "@/lib/ai";
 import { z } from "zod";
 
 const regenerateSchema = z.object({
@@ -18,7 +18,7 @@ const regenerateSchema = z.object({
   context: z.object({
     industry: z.string().optional(),
     description: z.string().optional(),
-    currentData: z.record(z.any()).optional(),
+    currentData: z.record(z.string(), z.any()).optional(),
   }).optional(),
 });
 
@@ -48,8 +48,11 @@ export async function POST(request: NextRequest) {
     }
 
     const { section, context } = parsed.data;
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const ai = getAI();
+    if (!ai) {
+      return NextResponse.json({ error: "AI service unavailable" }, { status: 503 });
+    }
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     let prompt = "";
     let result: Record<string, unknown> = {};
