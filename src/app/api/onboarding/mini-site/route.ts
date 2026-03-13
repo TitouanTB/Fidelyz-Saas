@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateMiniSiteContent, BrandingSuggestion, MenuExtraction } from "@/lib/ai";
+import { generateMiniSiteContent } from "@/lib/ai";
 import { z } from "zod";
 
 const miniSiteSchema = z.object({
   organizationName: z.string().min(2),
   industry: z.string().min(1),
   description: z.string().optional(),
-  branding: z.custom<BrandingSuggestion>(),
-  menuData: z.custom<MenuExtraction>().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -27,14 +25,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { organizationName, industry, description, branding, menuData } = parsed.data;
+    const { organizationName, industry, description } = parsed.data;
 
     const miniSiteContent = await generateMiniSiteContent(
       organizationName,
       industry,
-      description || "",
-      branding,
-      menuData
+      description || ""
     );
 
     return NextResponse.json({ miniSiteContent });
@@ -43,3 +39,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to generate mini-site content" }, { status: 500 });
   }
 }
+

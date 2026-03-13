@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateAdaptedRewards, MenuExtraction } from "@/lib/ai";
+import { generateAdaptedRewards } from "@/lib/ai";
 import { z } from "zod";
 
 const rewardsSchema = z.object({
   organizationName: z.string().min(2),
   industry: z.string().min(1),
-  menuData: z.custom<MenuExtraction>().optional(),
-  averagePrice: z.number().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -26,13 +24,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { organizationName, industry, menuData, averagePrice } = parsed.data;
+    const { industry } = parsed.data;
 
     const rewards = await generateAdaptedRewards(
-      organizationName,
       industry,
-      menuData,
-      averagePrice
+      []
     );
 
     return NextResponse.json({ rewards });
@@ -41,3 +37,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to generate rewards" }, { status: 500 });
   }
 }
+

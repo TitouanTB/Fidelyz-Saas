@@ -6,7 +6,6 @@ import { z } from "zod";
 const menuExtractionSchema = z.object({
   url: z.string().url().optional(),
   text: z.string().min(10).optional(),
-  organizationName: z.string().min(2),
 });
 
 export async function POST(request: NextRequest) {
@@ -25,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { url, text, organizationName } = parsed.data;
+    const { url, text } = parsed.data;
 
     if (!url && !text) {
       return NextResponse.json({ error: "Either URL or text is required" }, { status: 400 });
@@ -33,9 +32,9 @@ export async function POST(request: NextRequest) {
 
     let menuData;
     if (url) {
-      menuData = await extractMenuFromUrl(url, organizationName);
+      menuData = await extractMenuFromUrl(url);
     } else if (text) {
-      menuData = await extractMenuFromText(text, organizationName);
+      menuData = await extractMenuFromText(text);
     }
 
     return NextResponse.json({ menuData });
