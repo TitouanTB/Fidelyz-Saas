@@ -60,7 +60,7 @@ interface SendEmailParams {
   from?: string;
 }
 
-interface SendTemplateEmailParams extends SendEmailParams {
+interface SendTemplateEmailParams extends Omit<SendEmailParams, "html"> {
   templateName: string;
   templateData: Record<string, unknown>;
 }

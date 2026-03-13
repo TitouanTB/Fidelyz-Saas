@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         title: parsed.data.title,
         slug,
         description: parsed.data.description,
-        content,
+        content: content as any,
         isActive: parsed.data.isActive ?? true,
         isPublished: parsed.data.isPublished ?? false,
       },

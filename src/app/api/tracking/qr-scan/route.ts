@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
           qrCodeId,
           location,
           ...metadata,
-        },
+        } as any,
       },
     });
 

@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.organization.update({
       where: { id: member.organizationId },
-      data: { metadata: updatedMetadata as unknown as Record<string, unknown> },
+      data: { metadata: updatedMetadata as any },
     });
 
     return NextResponse.json({ success: true, timestamp: new Date().toISOString() });

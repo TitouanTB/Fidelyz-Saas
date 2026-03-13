@@ -110,7 +110,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const page = await prisma.publicPage.update({
       where: { id },
-      data: updateData,
+      data: updateData as any,
     });
 
     return NextResponse.json({ page });

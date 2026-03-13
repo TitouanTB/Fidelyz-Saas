@@ -1,4 +1,5 @@
 import { Channel, MessageStatus, Prisma } from "@prisma/client";
+import { Buffer } from "buffer";
 import { prisma } from "./prisma";
 import { sendEmail, sendTemplateEmail } from "./resend";
 import { sendSMS, sendWhatsApp } from "./twilio";
@@ -174,12 +175,12 @@ async function sendViaChannel(
 
     case "SMS":
       if (!customer.phone) throw new Error("Customer has no phone");
-      const smsResult = await sendSMS(customer.phone, content);
+      const smsResult = await sendSMS(customer.phone!, content);
       return { externalId: smsResult.sid, status: smsResult.status };
 
     case "WHATSAPP":
       if (!customer.phone) throw new Error("Customer has no phone");
-      const waResult = await sendWhatsApp(customer.phone, content);
+      const waResult = await sendWhatsApp(customer.phone!, content);
       return { externalId: waResult.sid, status: waResult.status };
 
     case "WALLET":
@@ -375,7 +376,7 @@ export async function updateMessageStatus(
   }
 
   if (metadata) {
-    updateData.metadata = metadata;
+    updateData.metadata = metadata as any;
   }
 
   await prisma.message.updateMany({
