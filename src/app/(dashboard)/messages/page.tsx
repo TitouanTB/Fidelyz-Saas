@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { formatDate } from "@/lib/utils";
-import { MessageSquare, Plus, Mail, MessageCircle, Send, CheckCheck, AlertCircle } from "lucide-react";
+import { formatDate, cn } from "@/lib/utils";
+import { MessageSquare, Plus, Mail, MessageCircle, Send, CheckCheck, AlertCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,6 @@ const CHANNEL_CONFIG: Record<string, { icon: any, label: string }> = {
   PUSH: { icon: Send, label: "Push" },
   WHATSAPP: { icon: MessageCircle, label: "WhatsApp" },
 };
-
-import { Clock } from "lucide-react";
 
 export default async function MessagesPage() {
   const supabase = await createClient();
