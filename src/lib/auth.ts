@@ -39,7 +39,15 @@ export async function getAuthContext(options: { redirectIfNotFound?: boolean } =
     return { user: null, member: null, organization: null };
   }
 
-  const member = await getOrgMember(user.id);
+  let member = null;
+  try {
+    member = await getOrgMember(user.id);
+  } catch (error) {
+    console.error("Database connection error in getAuthContext:", error);
+    // In case of DB failure, we still return the user but with no organization info
+    // This avoids a 500 error if the DB is temporarily down or misconfigured
+    return { user, member: null, organization: null, dbError: true };
+  }
   
   if (!member) {
     if (options.redirectIfNotFound) redirect("/onboarding");
