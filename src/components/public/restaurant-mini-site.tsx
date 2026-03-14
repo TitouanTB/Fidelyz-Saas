@@ -123,7 +123,7 @@ export function RestaurantMiniSite({ organization, content, activeReward }: Rest
         <section className="py-16 px-4 bg-white">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
-              <Sparkles className="w-8 h-8 mx-auto mb-4" style={{ color: primaryColor }} />
+              <Sparkles className="w-8 h-8 mx-auto mb-4" style={{ color: primaryColor } as React.CSSProperties} />
               <h2 className="text-3xl font-bold text-gray-900">{story.title || "Notre histoire"}</h2>
             </div>
             <p className="text-gray-600 text-lg leading-relaxed text-center max-w-2xl mx-auto">
@@ -161,7 +161,7 @@ export function RestaurantMiniSite({ organization, content, activeReward }: Rest
                       className="h-48 flex items-center justify-center"
                       style={{ backgroundColor: primaryColor + "10" }}
                     >
-                      <Utensils className="w-12 h-12" style={{ color: primaryColor + "40" }} />
+                      <Utensils className="w-12 h-12" style={{ color: primaryColor + "40" } as React.CSSProperties} />
                     </div>
                   )}
                   <div className="p-5">
@@ -186,7 +186,7 @@ export function RestaurantMiniSite({ organization, content, activeReward }: Rest
         style={{ background: `linear-gradient(135deg, ${primaryColor}10, ${primaryColor}05)` }}
       >
         <div className="max-w-4xl mx-auto text-center">
-          <Gift className="w-12 h-12 mx-auto mb-4" style={{ color: primaryColor }} />
+          <Gift className="w-12 h-12 mx-auto mb-4" style={{ color: primaryColor } as React.CSSProperties} />
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Programme de fidélité</h2>
           <p className="text-gray-600 mb-8 max-w-xl mx-auto">
             Gagnez des points à chaque visite et obtenez des récompenses exclusives

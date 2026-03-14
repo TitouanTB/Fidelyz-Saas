@@ -62,7 +62,7 @@ export async function InvoiceHistory({ organizationId }: InvoiceHistoryProps) {
                     {invoice.amount_due ? `$${(invoice.amount_due / 100).toFixed(2)}` : ""}
                   </td>
                   <td className="p-4 align-middle">
-                    <Badge variant={invoice.status === "paid" ? "default" : "secondary"}>
+                    <Badge variant={invoice.status === "paid" ? "default" : "outline"}>
                       {invoice.status}
                     </Badge>
                   </td>

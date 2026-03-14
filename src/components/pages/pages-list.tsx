@@ -119,7 +119,7 @@ export function PagesList({ pages, organizationSlug, primaryColor }: PagesListPr
                       className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                       style={{ backgroundColor: primaryColor + "15" }}
                     >
-                      <Globe className="w-5 h-5" style={{ color: primaryColor }} />
+                      <Globe className="w-5 h-5" style={{ color: primaryColor } as React.CSSProperties} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -127,11 +127,11 @@ export function PagesList({ pages, organizationSlug, primaryColor }: PagesListPr
                           {page.title}
                         </h3>
                         {page.isPublished ? (
-                          <Badge className="bg-green-100 text-green-700">
+                          <Badge variant="success">
                             Published
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Draft</Badge>
+                          <Badge variant="outline">Draft</Badge>
                         )}
                         {!page.isActive && (
                           <Badge variant="outline" className="text-gray-500">

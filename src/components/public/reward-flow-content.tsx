@@ -62,7 +62,7 @@ interface RewardFlowContentProps {
 }
 
 const getRewardIcon = (type: string) => {
-  const icons: Record<string, React.ComponentType<{ className?: string }>> = {
+  const icons: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties; color?: string; size?: number | string }>> = {
     DISCOUNT_PERCENT: Percent,
     DISCOUNT_FIXED: Ticket,
     FREE_PRODUCT: Coffee,
@@ -150,7 +150,7 @@ export function RewardFlowContent({
             style={{ backgroundColor: `${theme.primaryColor}10` }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-violet-default/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Gift className="w-10 h-10 relative z-10" style={{ color: theme.primaryColor }} />
+            <Gift className="w-10 h-10 relative z-10" style={{ color: theme.primaryColor } as React.CSSProperties} />
           </div>
           <h2 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Récupérez vos cadeaux</h2>
           <p className="text-text-secondary">

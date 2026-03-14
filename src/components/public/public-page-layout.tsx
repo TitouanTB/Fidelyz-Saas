@@ -85,7 +85,7 @@ export function PublicPageLayout({
               >
                 <span 
                   className="font-bold text-xl font-heading"
-                  style={{ color: colors.primaryColor }}
+                  style={{ color: colors.primaryColor } as React.CSSProperties}
                 >
                   {organization.name.charAt(0)}
                 </span>
@@ -130,7 +130,7 @@ export function PublicPageLayout({
                       className="w-10 h-10 rounded-xl flex items-center justify-center border border-white/10"
                       style={{ backgroundColor: `${colors.primaryColor}10` }}
                     >
-                      <span className="font-bold text-lg" style={{ color: colors.primaryColor }}>
+                      <span className="font-bold text-lg" style={{ color: colors.primaryColor } as React.CSSProperties}>
                         {organization.name.charAt(0)}
                       </span>
                     </div>

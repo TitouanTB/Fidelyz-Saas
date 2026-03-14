@@ -56,7 +56,7 @@ export function RewardPopup({
             className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"
             style={{ backgroundColor: primaryColor + "20" }}
           >
-            <Gift className="w-8 h-8" style={{ color: primaryColor }} />
+            <Gift className="w-8 h-8" style={{ color: primaryColor } as React.CSSProperties} />
           </div>
 
           <h3 className="text-xl font-bold text-gray-900">🎉 {rewardName}</h3>
