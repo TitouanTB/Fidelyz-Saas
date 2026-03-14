@@ -1,0 +1,81 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 23.0s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/lib/index.ts:4:10
+Type error: Module '"./twilio"' 
+declares 'twilioClient' 
+locally, but it is not exported.
+
+[0m [90m 2 |[39m 
+[36mexport[39m { 
+stripe[33m,[39m 
+[33mPLANS[39m[33m,[39m 
+getStripePrice[33m,[39m create
+CheckoutSession[33m,[39m creat
+eBillingPortalSession[33m,[39m
+ handleWebhookEvent } 
+[36mfrom[39m 
+[32m"./stripe"[39m[33m;[39m
+ [90m 3 |[39m 
+[36mexport[39m type { 
+[33mPlanKey[39m } 
+[36mfrom[39m 
+[32m"./stripe"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 
+|[39m [36mexport[39m { 
+twilioClient[33m,[39m 
+sendSMS[33m,[39m 
+sendWhatsApp[33m,[39m sendWhat
+sAppFromRestaurant[33m,[39m 
+sendBulkSMS } [36mfrom[39m 
+[32m"./twilio"[39m[33m;[39m
+ [90m   |[39m          
+[31m[1m^[22m[39m
+ [90m 5 |[39m 
+[36mexport[39m { 
+resend[33m,[39m 
+sendEmail[33m,[39m 
+sendBulkEmail[33m,[39m 
+sendTemplateEmail } 
+[36mfrom[39m 
+[32m"./resend"[39m[33m;[39m
+ [90m 6 |[39m 
+[36mexport[39m { 
+genAI[33m,[39m 
+model[33m,[39m generateCampaig
+nSuggestion[33m,[39m 
+analyzeCustomerData[33m,[39m 
+generateEmailContent } 
+[36mfrom[39m 
+[32m"./ai"[39m[33m;[39m
+ [90m 7 |[39m 
+[36mexport[39m { 
+cn[33m,[39m 
+formatCurrency[33m,[39m 
+formatDate[33m,[39m 
+formatRelativeDate[33m,[39m 
+generateSlug[33m,[39m 
+truncate[33m,[39m getInitials 
+} [36mfrom[39m [32m"./utils"
+[39m[33m;[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null

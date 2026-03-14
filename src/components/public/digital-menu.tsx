@@ -62,9 +62,9 @@ export function DigitalMenu({ organization, menuData, contact, activeReward }: D
   }, []);
 
   const products = menuData?.products || [];
-  const categories = menuData?.categories?.length > 0
+  const categories = (menuData?.categories && menuData.categories.length > 0)
     ? menuData.categories
-    : [...new Set(products.map(p => p.category))];
+    : Array.from(new Set(products.map(p => p.category)));
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -215,10 +215,10 @@ export function DigitalMenu({ organization, menuData, contact, activeReward }: D
                             <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="font-semibold text-gray-900">{product.name}</h3>
                               {product.isVegetarian && (
-                                <Leaf className="w-4 h-4 text-green-500" title="Végétarien" />
+                                <Leaf className="w-4 h-4 text-green-500" />
                               )}
                               {product.isSpicy && (
-                                <Flame className="w-4 h-4 text-red-500" title="Épicé" />
+                                <Flame className="w-4 h-4 text-red-500" />
                               )}
                               {product.isGlutenFree && (
                                 <span className="text-xs text-amber-600 font-medium">Sans gluten</span>

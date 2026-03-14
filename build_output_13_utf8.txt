@@ -1,0 +1,104 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 21.2s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+node.exe : Stripe secret key 
+not configured
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Stripe secret  
+   key not configured:String)   
+  [], RemoteException
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+Stripe secret key not configured
+Error [PrismaClientConstructorVa
+lidationError]: Using engine 
+type "client" requires either 
+"adapter" or "accelerateUrl" to 
+be provided to PrismaClient 
+constructor.
+Read more at https://pris.ly/d/c
+lient-constructor
+    at module evaluation (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[root-of-the-server]
+__01fdeb75._.js:1:1176)
+    at instantiateModule (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[turbopack]_runtime.
+js:740:9)
+    at getOrInstantiateModuleFro
+mParent (C:\Users\titou\Fidelyz-
+Saas-1\.next\server\chunks\[turb
+opack]_runtime.js:763:12)
+    at Context.esmImport [as i] 
+(C:\Users\titou\Fidelyz-Saas-1\.
+next\server\chunks\[turbopack]_r
+untime.js:228:20)
+    at module evaluation (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[root-of-the-server]
+__01fdeb75._.js:1:3144)
+    at instantiateModule (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[turbopack]_runtime.
+js:740:9)
+    at instantiateRuntimeModule 
+(C:\Users\titou\Fidelyz-Saas-1\.
+next\server\chunks\[turbopack]_r
+untime.js:768:12)
+Error [PrismaClientConstructorVa
+lidationError]: Using engine 
+type "client" requires either 
+"adapter" or "accelerateUrl" to 
+be provided to PrismaClient 
+constructor.
+Read more at https://pris.ly/d/c
+lient-constructor
+    at module evaluation (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[root-of-the-server]
+__f2bc1202._.js:1:1176)
+    at instantiateModule (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[turbopack]_runtime.
+js:740:9)
+    at getOrInstantiateModuleFro
+mParent (C:\Users\titou\Fidelyz-
+Saas-1\.next\server\chunks\[turb
+opack]_runtime.js:763:12)
+    at Context.esmImport [as i] 
+(C:\Users\titou\Fidelyz-Saas-1\.
+next\server\chunks\[turbopack]_r
+untime.js:228:20)
+    at module evaluation (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[root-of-the-server]
+__f2bc1202._.js:1:3484)
+    at instantiateModule (C:\Use
+rs\titou\Fidelyz-Saas-1\.next\se
+rver\chunks\[turbopack]_runtime.
+js:740:9)
+    at instantiateRuntimeModule 
+(C:\Users\titou\Fidelyz-Saas-1\.
+next\server\chunks\[turbopack]_r
+untime.js:768:12)
+
+> Build error occurred
+Error: Failed to collect page 
+data for 
+/api/cron/ai-suggestions
+    at ignore-listed frames {
+  type: 'Error'
+}

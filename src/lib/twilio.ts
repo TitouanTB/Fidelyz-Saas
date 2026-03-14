@@ -73,7 +73,14 @@ export const sendSMS = async (
     return { success: false, error: "SMS is disabled" };
   }
 
-  return withTwilio(
+  return withTwilio<{
+    success: boolean;
+    sid?: string;
+    status?: string;
+    to?: string;
+    from?: string;
+    error?: string;
+  }>(
     async (client) => {
       const message = await client.messages.create({
         body,
@@ -115,7 +122,14 @@ export const sendWhatsApp = async (
     return { success: false, error: "WhatsApp number not configured" };
   }
 
-  return withTwilio(
+  return withTwilio<{
+    success: boolean;
+    sid?: string;
+    status?: string;
+    to?: string;
+    from?: string;
+    error?: string;
+  }>(
     async (client) => {
       const message = await client.messages.create({
         body,
@@ -155,7 +169,14 @@ export const sendWhatsAppFromRestaurant = async (
     return { success: false, error: "WhatsApp is disabled" };
   }
 
-  return withTwilio(
+  return withTwilio<{
+    success: boolean;
+    sid?: string;
+    status?: string;
+    to?: string;
+    from?: string;
+    error?: string;
+  }>(
     async (client) => {
       const message = await client.messages.create({
         body,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { generateAISuggestions, isAIAvailable } from "@/lib/ai";
 
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
         }
 
         // 2. Suggest new rewards if organization has less than 4 active rewards
-        if (org.rewards.filter((r) => r.isActive).length < 4) {
+        if (org.rewards.filter((r: { isActive: boolean }) => r.isActive).length < 4) {
           const rewardResult = await generateAISuggestions(
             `Organization: ${org.name}, Industry: ${org.industry || "commerce"}`,
             "reward"

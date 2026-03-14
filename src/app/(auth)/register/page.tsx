@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { RegisterForm } from "@/components/auth/register-form";
 
@@ -12,7 +13,9 @@ export default function RegisterPage() {
       <p className="text-gray-600 text-sm mb-6">
         Créez votre compte Fidelyz gratuitement
       </p>
-      <RegisterForm />
+      <Suspense fallback={<div className="flex justify-center p-8"><div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" /></div>}>
+        <RegisterForm />
+      </Suspense>
     </>
   );
 }

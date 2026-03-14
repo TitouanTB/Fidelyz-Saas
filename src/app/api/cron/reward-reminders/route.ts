@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { sendBulkMessages, CHANNEL_PRIORITY } from "@/lib/messaging";
 import { getEnabledChannels } from "@/lib/feature-flags";
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     for (const org of organizations) {
       const customersWithExpiringRewards = org.customers.filter(
-        (c) => c.rewardClaims.length > 0
+        (c: any) => c.rewardClaims.length > 0
       );
 
       if (customersWithExpiringRewards.length === 0) {
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
           enableFallback: true,
           priority: CHANNEL_PRIORITY,
         },
-        customersWithExpiringRewards.map((c) => ({
+        customersWithExpiringRewards.map((c: any) => ({
           id: c.id,
           email: c.email,
           phone: c.phone,
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group by organization
-    const customersByOrg = customersWithHighPoints.reduce((acc, customer) => {
+    const customersByOrg = customersWithHighPoints.reduce((acc: any, customer: any) => {
       if (!acc[customer.organizationId]) {
         acc[customer.organizationId] = [];
       }
@@ -132,9 +133,10 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {} as Record<string, typeof customersWithHighPoints>);
 
-    for (const [orgId, customers] of Object.entries(customersByOrg)) {
+    for (const [orgId, orgCustomers] of Object.entries(customersByOrg)) {
+      const customers = orgCustomers as any[];
       // Filter customers who haven't had activity in 14 days
-      const inactiveCustomers = customers.filter((c) => {
+      const inactiveCustomers = customers.filter((c: any) => {
         if (!c.pointsHistory.length) return true;
         const lastActivity = c.pointsHistory[0]?.createdAt;
         return isAfter(now, addDays(new Date(lastActivity), 14));
@@ -151,7 +153,7 @@ export async function GET(request: NextRequest) {
           enableFallback: true,
           priority: CHANNEL_PRIORITY,
         },
-        inactiveCustomers.map((c) => ({
+        inactiveCustomers.map((c: any) => ({
           id: c.id,
           email: c.email,
           phone: c.phone,

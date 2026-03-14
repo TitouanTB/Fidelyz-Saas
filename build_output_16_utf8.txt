@@ -1,0 +1,83 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 18.8s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+node.exe : Stripe secret key 
+not configured
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Stripe secret  
+   key not configured:String)   
+  [], RemoteException
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+Stripe secret key not configured
+Stripe secret key not configured
+Stripe secret key not configured
+  Generating static pages using 11 workers (0/42) ...
+  Generating static pages using 11 workers (10/42) 
+Missing Supabase environment 
+variables
+Ô¿» useSearchParams() should be 
+wrapped in a suspense boundary 
+at page "/login". Read more: htt
+ps://nextjs.org/docs/messages/mi
+ssing-suspense-with-csr-bailout
+    at Q (C:\Users\titou\Fidelyz
+-Saas-1\.next\server\chunks\ssr\
+node_modules_next_920e7746._.js:
+2:2111)
+    at o (C:\Users\titou\Fidelyz
+-Saas-1\.next\server\chunks\ssr\
+node_modules_next_920e7746._.js:
+4:5314)
+    at r (C:\Users\titou\Fidelyz
+-Saas-1\.next\server\chunks\ssr\
+_2b61060d._.js:1:7909)
+    at an (C:\Users\titou\Fidely
+z-Saas-1\node_modules\next\dist\
+compiled\next-server\app-page-tu
+rbo.runtime.prod.js:2:84360)
+    at ai (C:\Users\titou\Fidely
+z-Saas-1\node_modules\next\dist\
+compiled\next-server\app-page-tu
+rbo.runtime.prod.js:2:86179)
+    at ai (C:\Users\titou\Fidely
+z-Saas-1\node_modules\next\dist\
+compiled\next-server\app-page-tu
+rbo.runtime.prod.js:2:104708)
+    at al (C:\Users\titou\Fidely
+z-Saas-1\node_modules\next\dist\
+compiled\next-server\app-page-tu
+rbo.runtime.prod.js:2:107953)
+    at as (C:\Users\titou\Fidely
+z-Saas-1\node_modules\next\dist\
+compiled\next-server\app-page-tu
+rbo.runtime.prod.js:2:105368)
+    at am (C:\Users\titou\Fidely
+z-Saas-1\node_modules\next\dist\
+compiled\next-server\app-page-tu
+rbo.runtime.prod.js:2:112882)
+    at au (C:\Users\titou\Fidely
+z-Saas-1\node_modules\next\dist\
+compiled\next-server\app-page-tu
+rbo.runtime.prod.js:2:109985)
+Error occurred prerendering 
+page "/login". Read more: https:
+//nextjs.org/docs/messages/prere
+nder-error
+Export encountered an error on 
+/(auth)/login/page: /login, 
+exiting the build.
+Ô¿» Next.js build worker exited 
+with code: 1 and signal: null

@@ -176,12 +176,12 @@ async function sendViaChannel(
     case "SMS":
       if (!customer.phone) throw new Error("Customer has no phone");
       const smsResult = await sendSMS(customer.phone!, content);
-      return { externalId: smsResult.sid, status: smsResult.status };
+      return { externalId: smsResult.sid || "unknown", status: smsResult.status || "sent" };
 
     case "WHATSAPP":
       if (!customer.phone) throw new Error("Customer has no phone");
       const waResult = await sendWhatsApp(customer.phone!, content);
-      return { externalId: waResult.sid, status: waResult.status };
+      return { externalId: waResult.sid || "unknown", status: waResult.status || "sent" };
 
     case "WALLET":
       if (!customer.walletEnabled) throw new Error("Customer has no wallet");

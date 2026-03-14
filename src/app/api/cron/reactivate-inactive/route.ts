@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { sendBulkMessages, CHANNEL_PRIORITY } from "@/lib/messaging";
 import { getEnabledChannels } from "@/lib/feature-flags";
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      const messagePromises = inactiveCustomers.map(async (customer) => {
+      const messagePromises = inactiveCustomers.map(async (customer: any) => {
         const lastVisit = customer.visitRecords[0]?.createdAt;
         const daysSinceLastVisit = lastVisit
           ? Math.floor(
@@ -139,7 +140,7 @@ export async function GET(request: NextRequest) {
             enableFallback: true,
             priority: CHANNEL_PRIORITY,
           },
-          batch.map((c) => ({
+          batch.map((c: any) => ({
             id: c.id,
             email: c.email,
             phone: c.phone,

@@ -1,0 +1,48 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 17.6s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/proxy.ts:31:18
+Type error: Expected 3 
+arguments, but got 2.
+
+[0m [90m 29 |[39m   [90m// 
+Update session for Supabase 
+Auth[39m
+ [90m 30 |[39m   
+[36mtry[39m {
+[31m[1m>[22m[39m[90m 31 
+|[39m     [36mreturn[39m 
+[36mawait[39m createServerClie
+nt(request[33m,[39m 
+response)[33m;[39m
+ [90m    |[39m                
+  [31m[1m^[22m[39m
+ [90m 32 |[39m   } 
+[36mcatch[39m (error) {
+ [90m 33 |[39m     [90m// 
+Handle auth errors 
+gracefully[39m
+ [90m 34 |[39m     
+[36mif[39m 
+(isHTTPError(error)) {[0m
+Next.js build worker exited 
+with code: 1 and signal: null

@@ -1,0 +1,49 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 16.5s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/types/index.ts:137:12
+Type error: Cannot find name 
+'Channel'.
+
+[0m [90m 135 |[39m [90m// 
+Multi-channel messaging 
+types[39m
+ [90m 136 |[39m 
+[36mexport[39m 
+[36minterface[39m [33mMessagi
+ngChannelConfig[39m {
+[31m[1m>[22m[39m[90m 137 
+|[39m   channel[33m:[39m 
+[33mChannel[39m[33m;[39m
+ [90m     |[39m            
+[31m[1m^[22m[39m
+ [90m 138 |[39m   
+enabled[33m:[39m 
+boolean[33m;[39m
+ [90m 139 |[39m   
+priority[33m:[39m 
+number[33m;[39m
+ [90m 140 |[39m   
+requiresFallback[33m:[39m 
+boolean[33m;[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null

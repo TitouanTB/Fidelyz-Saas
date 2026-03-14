@@ -509,7 +509,7 @@ export function RewardFlow({
                   className="w-full bg-[#25D366] hover:bg-[#25D366]/90"
                   onClick={() => {
                     const message = encodeURIComponent(`FIDELYZ-${organization.slug}`);
-                    const cleanWhatsAppNumber = organization.whatsappNumber.replace(/\D/g, "");
+                    const cleanWhatsAppNumber = (organization.whatsappNumber || "").replace(/\D/g, "");
                     window.open(`https://wa.me/${cleanWhatsAppNumber}?text=${message}`, "_blank");
                   }}
                 >

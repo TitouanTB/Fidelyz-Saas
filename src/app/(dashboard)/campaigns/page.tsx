@@ -7,6 +7,7 @@ import { Megaphone, Plus } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { Campaign, Channel } from "@prisma/client";
+import { CampaignType, CampaignStatus } from "@prisma/client";
 
 type CampaignWithCount = Campaign & { _count: { messages: number } };
 
@@ -94,7 +95,9 @@ export default async function CampaignsPage() {
                     <td className="px-6 py-4">
                       <div className="flex gap-1 flex-wrap">
                         {campaign.channels.map((ch) => (
-                          <Badge key={ch} variant="outline">{ch}</Badge>
+                          <Badge key={ch} variant="outline" className="text-xs">
+                {ch}
+              </Badge>
                         ))}
                       </div>
                     </td>

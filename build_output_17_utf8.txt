@@ -1,0 +1,117 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 39.2s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+node.exe : Stripe secret key 
+not configured
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Stripe secret  
+   key not configured:String)   
+  [], RemoteException
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+Stripe secret key not configured
+Stripe secret key not configured
+Stripe secret key not configured
+  Generating static pages using 11 workers (0/42) ...
+  Generating static pages using 11 workers (10/42) 
+Missing Supabase environment 
+variables
+Missing Supabase environment 
+variables
+  Generating static pages using 11 workers (20/42) 
+  Generating static pages using 11 workers (31/42) 
+Ô£ô Generating static pages using 11 workers (42/42) in 2.3s
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ ãÆ /[slug]
+Ôö£ ãÆ /analytics
+Ôö£ ãÆ /api/analytics
+Ôö£ ãÆ /api/analytics/export
+Ôö£ ãÆ /api/auth/callback
+Ôö£ ãÆ /api/auth/session
+Ôö£ ãÆ /api/auth/signout
+Ôö£ ãÆ /api/billing/checkout
+Ôö£ ãÆ /api/billing/portal
+Ôö£ ãÆ /api/billing/webhook
+Ôö£ ãÆ /api/campaigns
+Ôö£ ãÆ /api/cron/ai-suggestions
+Ôö£ ãÆ /api/cron/reactivate-inactive
+Ôö£ ãÆ /api/cron/reset-quotas
+Ôö£ ãÆ /api/cron/reward-reminders
+Ôö£ ãÆ /api/cron/send-campaigns
+Ôö£ ãÆ /api/customers
+Ôö£ ãÆ /api/health
+Ôö£ ãÆ /api/messaging/bulk
+Ôö£ ãÆ /api/messaging/retry
+Ôö£ ãÆ /api/messaging/send
+Ôö£ ãÆ /api/messaging/stats
+Ôö£ ãÆ /api/messaging/webhooks
+Ôö£ ãÆ /api/onboarding
+Ôö£ ãÆ /api/onboarding/ai-description
+Ôö£ ãÆ /api/onboarding/branding
+Ôö£ ãÆ /api/onboarding/menu-extraction
+Ôö£ ãÆ /api/onboarding/mini-site
+Ôö£ ãÆ /api/onboarding/regenerate
+Ôö£ ãÆ /api/onboarding/rewards
+Ôö£ ãÆ /api/pages
+Ôö£ ãÆ /api/pages/[id]
+Ôö£ ãÆ /api/parcours
+Ôö£ ãÆ /api/parcours/[stage]
+Ôö£ ãÆ /api/public/[slug]/claim
+Ôö£ ãÆ /api/public/[slug]/customer
+Ôö£ ãÆ /api/public/[slug]/rewards
+Ôö£ ãÆ /api/public/restaurant/[slug]
+Ôö£ ãÆ /api/public/signup
+Ôö£ ãÆ /api/rewards/claim
+Ôö£ ãÆ /api/settings
+Ôö£ ãÆ /api/settings/autosave
+Ôö£ ãÆ /api/tracking/qr-scan
+Ôö£ ãÆ /api/wallet/google
+Ôö£ ãÆ /api/webhooks/twilio
+Ôö£ Ôùï /auth-error
+Ôö£ ãÆ /billing
+Ôö£ ãÆ /c/[token]
+Ôö£ ãÆ /campaigns
+Ôö£ ãÆ /campaigns/new
+Ôö£ ãÆ /customers
+Ôö£ ãÆ /customers/new
+Ôö£ ãÆ /dashboard
+Ôö£ Ôùï /dashboard/settings/editor
+Ôö£ Ôùï /forgot-password
+Ôö£ Ôùï /login
+Ôö£ ãÆ /m/[slug]
+Ôö£ ãÆ /messages
+Ôö£ ãÆ /messages/new
+Ôö£ ãÆ /onboarding
+Ôö£ ãÆ /p/[slug]
+Ôö£ ãÆ /parcours
+Ôö£ ãÆ /r/[slug]
+Ôö£ Ôùï /register
+Ôö£ Ôùï /reset-password
+Ôö£ ãÆ /settings
+Ôö£ ãÆ /settings/pages
+Ôö£ ãÆ /settings/pages/[id]
+Ôö£ ãÆ /settings/pages/new
+Ôöö Ôùï /verify-email
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+

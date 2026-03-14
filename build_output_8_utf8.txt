@@ -1,0 +1,63 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 20.2s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/lib/messaging.ts:179:16
+Type error: Type 'string | 
+undefined' is not assignable to 
+type 'string'.
+  Type 'undefined' is not 
+assignable to type 'string'.
+
+[0m [90m 177 |[39m       
+[36mif[39m ([33m![39mcustome
+r[33m.[39mphone) 
+[36mthrow[39m [36mnew[39m 
+[33mError[39m([32m"Customer 
+has no phone"[39m)[33m;[39m
+ [90m 178 |[39m       
+[36mconst[39m smsResult 
+[33m=[39m [36mawait[39m send
+SMS(customer[33m.[39mphone[33
+m![39m[33m,[39m 
+content)[33m;[39m
+[31m[1m>[22m[39m[90m 179 
+|[39m       [36mreturn[39m { 
+externalId[33m:[39m smsResult
+[33m.[39msid[33m,[39m 
+status[33m:[39m 
+smsResult[33m.[39mstatus 
+}[33m;[39m
+ [90m     |[39m               
+ [31m[1m^[22m[39m
+ [90m 180 |[39m
+ [90m 181 |[39m     
+[36mcase[39m 
+[32m"WHATSAPP"[39m[33m:[39m
+ [90m 182 |[39m       
+[36mif[39m ([33m![39mcustome
+r[33m.[39mphone) 
+[36mthrow[39m [36mnew[39m 
+[33mError[39m([32m"Customer 
+has no 
+phone"[39m)[33m;[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null

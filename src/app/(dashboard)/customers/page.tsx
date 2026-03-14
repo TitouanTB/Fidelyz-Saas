@@ -70,7 +70,7 @@ export default async function CustomersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {customers.map((customer) => (
+                {customers.map((customer: any) => (
                   <tr key={customer.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div>
@@ -94,7 +94,7 @@ export default async function CustomersPage() {
                     <td className="px-6 py-4 text-sm text-gray-700">{customer.visits}</td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
-                        {customer.tags.slice(0, 2).map((tag) => (
+                        {customer.tags.slice(0, 2).map((tag: string) => (
                           <Badge key={tag} variant="secondary">{tag}</Badge>
                         ))}
                         {customer.tags.length > 2 && (

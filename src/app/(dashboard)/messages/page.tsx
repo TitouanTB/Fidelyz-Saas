@@ -80,7 +80,7 @@ export default async function MessagesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {messages.map((msg) => (
+                {messages.map((msg: any) => (
                   <tr key={msg.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <p className="text-sm font-medium text-gray-900">

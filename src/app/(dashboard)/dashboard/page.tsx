@@ -1,23 +1,13 @@
 import { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { Users, Megaphone, MessageSquare, Star, BarChart3, TrendingUp } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { redirect } from "next/navigation";
+import { getAuthContext } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Dashboard - Fidelyz" };
 
-async function getDashboardData(userId: string) {
-  const member = await prisma.organizationMember.findFirst({
-    where: { userId },
-    include: { organization: true },
-  });
-
-  if (!member) return null;
-
-  const orgId = member.organizationId;
-
+async function getDashboardData(orgId: string) {
   const [customers, campaigns, messages, recentCustomers] = await Promise.all([
     prisma.customer.count({ where: { organizationId: orgId } }),
     prisma.campaign.count({ where: { organizationId: orgId } }),
@@ -36,24 +26,27 @@ async function getDashboardData(userId: string) {
   const openRate = messages > 0 ? Math.round((openedMessages / messages) * 100) : 0;
 
   return {
-    organization: member.organization,
     stats: { customers, campaigns, messages, openRate },
     recentCustomers,
   };
 }
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { user, organization } = await getAuthContext({ redirectIfNotFound: true });
+  
+  // organization is guaranteed to be non-null here due to redirectIfNotFound: true
+  // but we add a check for TypeScript safety
+  if (!organization) return null;
 
-  const data = await getDashboardData(user.id);
+  const data = await getDashboardData(organization.id);
 
   if (!data) {
-    redirect("/onboarding");
+    // This should technically not happen if getAuthContext worked as expected
+    // but we'll leave a failsafe
+    return <div>Failed to load dashboard data</div>;
   }
 
-  const { organization, stats, recentCustomers } = data;
+  const { stats, recentCustomers } = data;
 
   return (
     <div className="space-y-6">
@@ -83,7 +76,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {recentCustomers.map((c) => (
+              {recentCustomers.map((c: any) => (
                 <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                   <div>
                     <p className="text-sm font-medium text-gray-900">

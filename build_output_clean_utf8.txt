@@ -1,0 +1,61 @@
+﻿
+> fidelyz@0.1.0 build
+> prisma generate && next build
+
+node.exe : Prisma schema loaded 
+from prisma\schema.prisma.
+Au caractère C:\Program 
+Files\nodejs\npm.ps1:29 : 3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: (Prisma schema l...\sc  
+  hema.prisma.:String) [], Remote   
+ Exception
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+
+Ô£ö Generated Prisma Client (v7.4.1) to .\node_modules\@prisma\client in 419ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 17.4s
+  Running TypeScript ...
+Failed to compile.
+
+./src/components/onboarding/onboardi
+ng-wizard.tsx:11:18
+Type error: Cannot find name 
+'NativeSelect'.
+
+[0m [90m  9 |[39m 
+[36mimport[39m { [33mInput[39m 
+} [36mfrom[39m [32m"@/components/
+ui/input"[39m[33m;[39m
+ [90m 10 |[39m [36mimport[39m { 
+[33mTextarea[39m } [36mfrom[39m 
+[32m"@/components/ui/textarea"[39m
+[33m;[39m
+[31m[1m>[22m[39m[90m 11 |[39m 
+                
+[33m<[39m[33mNativeSelect[39m
+ [90m    |[39m                  
+[31m[1m^[22m[39m
+ [90m 12 |[39m                   
+label[33m=[39m[32m"Industry"[39m
+ [90m 13 |[39m                   o
+ptions[33m=[39m{[33mINDUSTRIES[3
+9m}
+ [90m 14 |[39m                   e
+rror[33m=[39m{errors[33m.[39mind
+ustry[33m?[39m[33m.[39mmessage}
+[0m
+Next.js build worker exited with 
+code: 1 and signal: null

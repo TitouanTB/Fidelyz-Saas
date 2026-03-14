@@ -1,0 +1,47 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 18.8s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/lib/ai.ts:91:7
+Type error: Type 'false' is not 
+assignable to type 'true'.
+
+[0m [90m 89 |[39m       
+[36mreturn[39m { 
+success[33m:[39m 
+[36mtrue[39m[33m,[39m 
+content[33m:[39m text 
+}[33m;[39m
+ [90m 90 |[39m     
+}[33m,[39m
+[31m[1m>[22m[39m[90m 91 
+|[39m     { success[33m:[39m 
+[36mfalse[39m [36mas[39m 
+[36mconst[39m[33m,[39m 
+error[33m:[39m [32m"AI 
+service unavailable"[39m }
+ [90m    |[39m       
+[31m[1m^[22m[39m
+ [90m 92 |[39m   )[33m;[39m
+ [90m 93 |[39m }[33m;[39m
+ [90m 94 |[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null

@@ -1,0 +1,66 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 17.1s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+node.exe : Stripe secret key 
+not configured
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Stripe secret  
+   key not configured:String)   
+  [], RemoteException
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+Stripe secret key not configured
+Stripe secret key not configured
+  Generating static pages using 11 workers (0/56) ...
+  Generating static pages using 11 workers (14/56) 
+Error occurred prerendering 
+page "/settings/pages". Read 
+more: https://nextjs.org/docs/me
+ssages/prerender-error
+Error: @supabase/ssr: Your 
+project's URL and API key are 
+required to create a Supabase 
+client!
+
+Check your Supabase project's 
+API settings to find these 
+values
+
+https://supabase.com/dashboard/p
+roject/_/settings/api
+    at <unknown> (https://supaba
+se.com/dashboard/project/_/setti
+ngs/api)
+    at <unknown> (C:\Users\titou
+\Fidelyz-Saas-1\.next\server\chu
+nks\ssr\_4d226d56._.js:55:63)
+    at ct (C:\Users\titou\Fidely
+z-Saas-1\.next\server\chunks\ssr
+\_4d226d56._.js:59:4544)
+    at cu (C:\Users\titou\Fidely
+z-Saas-1\.next\server\chunks\ssr
+\_4d226d56._.js:59:4652)
+    at g (C:\Users\titou\Fidelyz
+-Saas-1\.next\server\chunks\ssr\
+[root-of-the-server]__e9739e1f._
+.js:1:1636) {
+  digest: '3657542359'
+}
+Export encountered an error on /
+(dashboard)/settings/pages/page:
+ /settings/pages, exiting the 
+build.
+Ô¿» Next.js build worker exited 
+with code: 1 and signal: null

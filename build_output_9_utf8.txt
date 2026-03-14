@@ -1,0 +1,50 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 17.6s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/lib/stripe.ts:252:5
+Type error: Argument of type '{ 
+data: never[]; has_more: false; 
+}' is not assignable to 
+parameter of type 
+'Response<ApiList<Invoice>>'.
+  Type '{ data: never[]; 
+has_more: false; }' is missing 
+the following properties from 
+type 'ApiList<Invoice>': 
+object, url
+
+[0m [90m 250 |[39m         
+limit[33m,[39m
+ [90m 251 |[39m       
+})[33m,[39m
+[31m[1m>[22m[39m[90m 252 
+|[39m     { data[33m:[39m 
+[][33m,[39m 
+has_more[33m:[39m 
+[36mfalse[39m }
+ [90m     |[39m     
+[31m[1m^[22m[39m
+ [90m 253 |[39m   )[33m;[39m
+ [90m 254 |[39m }[33m;[39m
+ [90m 255 |[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null

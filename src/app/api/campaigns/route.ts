@@ -57,6 +57,60 @@ export async function POST(request: NextRequest) {
 
     const { scheduledAt, targetTags, targetTiers, ...rest } = parsed.data;
 
+    // --- Quota Enforcement ---
+    const org = await prisma.organization.findUnique({
+      where: { id: member.organizationId },
+      select: { plan: true },
+    });
+
+    if (!org) {
+      return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+    }
+
+    const { PLANS } = await import("@/lib/stripe");
+    const planDetails = PLANS[org.plan as keyof typeof PLANS];
+    
+    // Parse the feature string like "1 campaign/month" to get the limit. If unlimited, it will skip this check.
+    const campaignFeature = planDetails.features.find((f: string) => f.includes("campaign"));
+    
+    if (campaignFeature && !campaignFeature.toLowerCase().includes("unlimited")) {
+      const match = campaignFeature.match(/(\d+)/);
+      const limit = match ? parseInt(match[1]) : 0;
+      
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const campaignsThisMonth = await prisma.campaign.count({
+        where: {
+          organizationId: member.organizationId,
+          createdAt: {
+            gte: startOfMonth,
+          },
+        },
+      });
+
+      if (campaignsThisMonth >= limit) {
+        return NextResponse.json(
+          { error: `Campaign limit reached for ${planDetails.name} plan (${limit}/month). Please upgrade.` },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Channel restriction check (e.g., Free plan only allows EMAIL)
+    const channelFeature = planDetails.features.find((f: string) => f.includes("Email") || f.includes("channel"));
+    if (channelFeature && channelFeature.toLowerCase().includes("only")) {
+      const hasRestrictedChannels = rest.channels.some((c: string) => c !== "EMAIL");
+      if (hasRestrictedChannels) {
+        return NextResponse.json(
+          { error: `Your current plan only supports Email campaigns. Please upgrade to use SMS, WhatsApp etc.` },
+          { status: 403 }
+        );
+      }
+    }
+    // --- End Quota Enforcement ---
+
     const campaign = await prisma.campaign.create({
       data: {
         ...rest,

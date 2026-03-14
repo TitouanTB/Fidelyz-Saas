@@ -249,7 +249,7 @@ export const listInvoices = async (customerId: string, limit = 10) => {
         customer: customerId,
         limit,
       }),
-    { data: [], has_more: false }
+    { object: "list", data: [], has_more: false, url: "" } as any
   );
 };
 

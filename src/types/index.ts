@@ -1,5 +1,8 @@
-export type { Organization, Customer, Campaign, Message, PublicPage, AnalyticsEvent, OrganizationMember } from "@prisma/client";
-export { Plan, MemberRole, CampaignType, CampaignStatus, Channel, MessageStatus, PointsType } from "@prisma/client";
+import type { Organization, Customer, Campaign, Message, PublicPage, AnalyticsEvent, OrganizationMember } from "@prisma/client";
+import { Plan, MemberRole, CampaignType, CampaignStatus, Channel, MessageStatus, PointsType } from "@prisma/client";
+
+export type { Organization, Customer, Campaign, Message, PublicPage, AnalyticsEvent, OrganizationMember };
+export { Plan, MemberRole, CampaignType, CampaignStatus, Channel, MessageStatus, PointsType };
 
 export * from "./analytics";
 

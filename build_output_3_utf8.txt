@@ -1,0 +1,48 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 18.4s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N    
+otSpecified: (Failed to com    
+pile.:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId : N    
+ativeCommandError
+ 
+
+./src/components/public/digital-menu
+.tsx:65:22
+Type error: 
+'menuData.categories.length' is 
+possibly 'undefined'.
+
+[0m [90m 63 |[39m
+ [90m 64 |[39m   [36mconst[39m 
+products [33m=[39m menuData[33m?
+[39m[33m.[39mproducts 
+[33m||[39m [][33m;[39m
+[31m[1m>[22m[39m[90m 65 |[39m 
+  [36mconst[39m categories 
+[33m=[39m menuData[33m?[39m[33m
+.[39mcategories[33m?[39m[33m.[3
+9mlength [33m>[39m [35m0[39m
+ [90m    |[39m                    
+  [31m[1m^[22m[39m
+ [90m 66 |[39m     [33m?[39m 
+menuData[33m.[39mcategories
+ [90m 67 |[39m     [33m:[39m 
+[[33m...[39m[36mnew[39m [33mSet
+[39m(products[33m.[39mmap(p 
+[33m=>[39m 
+p[33m.[39mcategory))][33m;[39m
+ [90m 68 |[39m[0m
+Next.js build worker exited with 
+code: 1 and signal: null

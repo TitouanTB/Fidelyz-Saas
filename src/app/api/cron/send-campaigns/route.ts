@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { sendBulkMessages, CHANNEL_PRIORITY } from "@/lib/messaging";
 import { getEnabledChannels } from "@/lib/feature-flags";
-import { MessageStatus } from "@prisma/client";
+import { Channel, Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -27,70 +28,51 @@ export async function GET(request: NextRequest) {
         status: "SCHEDULED",
         scheduledAt: { lte: now },
       },
-      include: {
-        organization: {
-          include: {
-            customers: {
-              select: {
-                id: true,
-                email: true,
-                phone: true,
-                tags: true,
-                points: true,
-                tier: true,
-                unsubscribed: true,
-              },
-            },
-          },
-        },
-      },
+      // Removed the heavy 'include' that fetched all customers into memory
     });
 
     const results = [];
+    const BATCH_SIZE = 500; // Process 500 customers at a time per campaign
 
     for (const campaign of scheduledCampaigns) {
-      let targetCustomers = campaign.organization.customers;
+      // Build the Prisma where clause based on campaign targeting
+      const customerWhere: Prisma.CustomerWhereInput = {
+        organizationId: campaign.organizationId,
+        unsubscribed: false, // Always filter out unsubscribed at DB level
+      };
 
-      // Apply targeting filters
       if (campaign.targetTags.length > 0) {
-        targetCustomers = targetCustomers.filter((c) =>
-          campaign.targetTags.some((tag) => c.tags.includes(tag))
-        );
+        customerWhere.tags = { hasSome: campaign.targetTags };
       }
 
       if (campaign.targetTiers.length > 0) {
-        targetCustomers = targetCustomers.filter((c) =>
-          c.tier ? campaign.targetTiers.includes(c.tier) : false
-        );
+        customerWhere.tier = { in: campaign.targetTiers };
       }
 
       if (campaign.minPoints !== null) {
-        targetCustomers = targetCustomers.filter(
-          (c) => c.points >= campaign.minPoints!
-        );
+        customerWhere.points = { gte: campaign.minPoints };
       }
 
       if (campaign.maxPoints !== null) {
-        targetCustomers = targetCustomers.filter(
-          (c) => c.points <= campaign.maxPoints!
-        );
+        customerWhere.points = {
+          ...(customerWhere.points as Prisma.IntFilter),
+          lte: campaign.maxPoints,
+        };
       }
 
-      if (campaign.minVisits !== null) {
-        // Note: This would require visit count data
-        // For now, we skip this filter
-      }
+      // First, get the total count of eligible customers for this campaign
+      const totalEligibleCustomers = await prisma.customer.count({
+        where: customerWhere,
+      });
 
-      // Filter out unsubscribed customers
-      const eligibleCustomers = targetCustomers.filter((c) => !c.unsubscribed);
-
-      if (eligibleCustomers.length === 0) {
+      if (totalEligibleCustomers === 0) {
         await prisma.campaign.update({
           where: { id: campaign.id },
           data: {
             status: "COMPLETED",
             sentAt: new Date(),
             completedAt: new Date(),
+            totalSent: 0,
           },
         });
 
@@ -102,45 +84,82 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // Send messages with fallback
-      const sendResults = await sendBulkMessages(
-        {
-          organizationId: campaign.organizationId,
-          channels: campaign.channels,
-          subject: campaign.subject || undefined,
-          content: campaign.content,
-          campaignId: campaign.id,
-          enableFallback: true,
-          priority: CHANNEL_PRIORITY,
-        },
-        eligibleCustomers.map((c) => ({
-          id: c.id,
-          email: c.email,
-          phone: c.phone,
-          walletEnabled: false, // Would be fetched from preferences
-          unsubscribed: c.unsubscribed,
-        }))
-      );
+      let totalSuccessful = 0;
+      let totalFailed = 0;
+      let processed = 0;
 
-      // Update campaign with results
-      const successful = sendResults.filter((r) => r.success).length;
-      const failed = sendResults.filter((r) => !r.success).length;
+      // Update status to ACTIVE while processing
+      await prisma.campaign.update({
+        where: { id: campaign.id },
+        data: { status: "ACTIVE", sentAt: new Date() },
+      });
 
+      // Process customers in batches using cursor-like pagination (skip/take)
+      // For cron jobs under Vercel time limits, we process as much as we can.
+      // If we timeout, the next cron run will pick up remaining sending (requires tracking)
+      // For now, we rely on the DB batching to avoid Out of Memory (OOM)
+      
+      while (processed < totalEligibleCustomers) {
+        const batchCustomers = await prisma.customer.findMany({
+          where: customerWhere,
+          select: {
+            id: true,
+            email: true,
+            phone: true,
+            unsubscribed: true,
+          },
+          skip: processed,
+          take: BATCH_SIZE,
+          orderBy: { id: "asc" }, // Ensure stable sorting for pagination
+        });
+
+        if (batchCustomers.length === 0) break;
+
+        const sendResults = await sendBulkMessages(
+          {
+            organizationId: campaign.organizationId,
+            channels: campaign.channels,
+            subject: campaign.subject || undefined,
+            content: campaign.content,
+            campaignId: campaign.id,
+            enableFallback: true,
+            priority: CHANNEL_PRIORITY,
+          },
+          batchCustomers.map((c: { id: string; email: string; phone: string | null; unsubscribed: boolean }) => ({
+             id: c.id,
+             email: c.email,
+             phone: c.phone,
+             walletEnabled: false, 
+             unsubscribed: c.unsubscribed,
+          }))
+        );
+
+        const batchSuccessful = sendResults.filter((r) => r.success).length;
+        const batchFailed = sendResults.filter((r) => !r.success).length;
+
+        totalSuccessful += batchSuccessful;
+        totalFailed += batchFailed;
+        processed += batchCustomers.length;
+        
+        // Optionally update progress in DB here if jobs take very long
+      }
+
+      // Finish campaign
       await prisma.campaign.update({
         where: { id: campaign.id },
         data: {
           status: "COMPLETED",
-          sentAt: new Date(),
           completedAt: new Date(),
-          totalSent: successful,
+          totalSent: totalSuccessful,
+          // You could track totalFailed here if added to schema
         },
       });
 
       results.push({
         campaignId: campaign.id,
-        messagesSent: successful,
-        failed,
-        totalCustomers: eligibleCustomers.length,
+        messagesSent: totalSuccessful,
+        failed: totalFailed,
+        totalCustomers: totalEligibleCustomers,
       });
     }
 

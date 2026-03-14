@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -10,7 +11,7 @@ export interface CreateEventParams {
   clientId?: string;
   type: string;
   eventName?: string;
-  properties?: Record<string, unknown>;
+  properties?: Prisma.InputJsonValue;
   sessionId?: string;
   visitorId?: string;
   userAgent?: string;

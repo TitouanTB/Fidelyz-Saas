@@ -1,7 +1,32 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createServerClient, isHTTPError } from "@/lib/supabase/middleware";
+import { createServerClient } from "@supabase/ssr";
+import { isHTTPError } from "@/lib/supabase/middleware";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function proxy(request: NextRequest) {
+  // 1. Rate Limiting
+  const ip = (request as any).ip ?? request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(',')[0] ?? "anonymous";
+  const isApi = request.nextUrl.pathname.startsWith("/api");
+  const isPublicApi = request.nextUrl.pathname.startsWith("/api/public") || request.nextUrl.pathname.startsWith("/api/health");
+
+  // stricter limits for public APIs
+  const limit = isPublicApi ? 30 : 100;
+  const { success, info } = await rateLimit(`ratelimit_${ip}_${request.nextUrl.pathname}`, limit);
+
+  if (!success && isApi) {
+    return NextResponse.json(
+      { error: "Too many requests", retryAfter: info.reset },
+      { 
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": info.limit.toString(),
+          "X-RateLimit-Remaining": info.remaining.toString(),
+          "X-RateLimit-Reset": info.reset.toString(),
+        }
+      }
+    );
+  }
+
   // Add security headers
   const response = NextResponse.next({
     request,
@@ -28,7 +53,29 @@ export async function proxy(request: NextRequest) {
 
   // Update session for Supabase Auth
   try {
-    return await createServerClient(request, response);
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    // This refreshes the session if needed
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error) throw error;
+
+    return response;
   } catch (error) {
     // Handle auth errors gracefully
     if (isHTTPError(error)) {

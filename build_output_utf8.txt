@@ -1,0 +1,58 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 20.1s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: (Failed to compile.:St  
+  ring) [], RemoteException
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+
+./src/app/api/analytics/export/route
+.ts:126:5
+Type error: Cannot find name 
+'orgVisits'. Did you mean 'visits'?
+
+[0m [90m 124 |[39m     
+[36mconst[39m totalCampaigns 
+[33m=[39m campaigns[33m.[39mleng
+th[33m;[39m
+ [90m 125 |[39m     [36mlet[39m 
+totalRevenue [33m=[39m 
+[35m0[39m[33m;[39m
+[31m[1m>[22m[39m[90m 126 
+|[39m     orgVisits[33m.[39mforEa
+ch((v[33m:[39m any) [33m=>[39m 
+{ totalRevenue [33m+=[39m 
+(v[33m.[39mamount [33m||[39m 
+[35m0[39m)[33m;[39m 
+})[33m;[39m
+ [90m     |[39m     
+[31m[1m^[22m[39m
+ [90m 127 |[39m     [36mlet[39m 
+totalPointsEarned [33m=[39m 
+[35m0[39m[33m;[39m
+ [90m 128 |[39m     orgPointsTrans
+actions[33m.[39mfilter((p[33m:[3
+9m any) [33m=>[39m 
+p[33m.[39mtype [33m===[39m [32m
+"EARN"[39m)[33m.[39mforEach((p[3
+3m:[39m any) [33m=>[39m { 
+totalPointsEarned [33m+=[39m 
+(p[33m.[39mpoints [33m||[39m 
+[35m0[39m)[33m;[39m 
+})[33m;[39m
+ [90m 129 |[39m     [36mlet[39m 
+totalPointsRedeemed [33m=[39m 
+[35m0[39m[33m;[39m[0m
+Next.js build worker exited with 
+code: 1 and signal: null

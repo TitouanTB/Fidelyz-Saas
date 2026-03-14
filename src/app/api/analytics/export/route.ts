@@ -118,18 +118,31 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Filter visits and points for this organization
-    const orgVisits = visits.filter((v) => v.customer?.organizationId === orgId);
-    const orgPointsTransactions = pointsTransactions.filter((p) => p.customer?.organizationId === orgId);
-
-    // Calculate summary stats
+    // Calculate summary
+    const orgVisits = visits.filter((v: any) => v.customer?.organizationId === orgId);
+    const orgPointsTransactions = pointsTransactions.filter((p: any) => p.customer?.organizationId === orgId);
     const totalCustomers = customers.length;
     const totalMessages = messages.length;
     const totalCampaigns = campaigns.length;
-    const totalRevenue = orgVisits.reduce((sum, v) => sum + (v.amount || 0), 0);
-    const totalPointsEarned = orgPointsTransactions.filter((p) => p.type === "EARN").reduce((sum, p) => sum + p.points, 0);
-    const totalPointsRedeemed = orgPointsTransactions.filter((p) => p.type === "REDEEM").reduce((sum, p) => sum + p.points, 0);
-    const deliveredMessages = messages.filter((m) => ["DELIVERED", "OPENED", "CLICKED"].includes(m.status)).length;
-    const openedMessages = messages.filter((m) => ["OPENED", "CLICKED"].includes(m.status)).length;
+    let totalRevenue = 0;
+    orgVisits.forEach((v: any) => { totalRevenue += (v.amount || 0); });
+    let totalPointsEarned = 0;
+    orgPointsTransactions.filter((p: any) => p.type === "EARN").forEach((p: any) => { totalPointsEarned += (p.points || 0); });
+    let totalPointsRedeemed = 0;
+    orgPointsTransactions.filter((p: any) => p.type === "REDEEM").forEach((p: any) => { totalPointsRedeemed += (p.points || 0); });
+    const deliveredMessages = messages.filter((m: any) => ["DELIVERED", "OPENED", "CLICKED"].includes(m.status)).length;
+    const openedMessages = messages.filter((m: any) => ["OPENED", "CLICKED"].includes(m.status)).length;
+
+    const summaryData = [
+      { key: "Total Revenue", value: `$${totalRevenue.toFixed(2)}` },
+      { key: "Total Visits", value: orgVisits.length.toString() },
+      { key: "Average Order Value", value: orgVisits.length > 0 ? `$${(totalRevenue / orgVisits.length).toFixed(2)}` : "$0.00" },
+      { key: "Points Issued", value: totalPointsEarned.toString() },
+      { key: "Points Redeemed", value: totalPointsRedeemed.toString() },
+      { key: "Messages Sent", value: totalMessages.toString() },
+      { key: "Message Open Rate", value: totalMessages > 0 ? `${((openedMessages / totalMessages) * 100).toFixed(1)}%` : "0%" }
+    ];
+
     const deliveryRate = totalMessages > 0 ? ((deliveredMessages / totalMessages) * 100).toFixed(1) : "0";
     const openRate = deliveredMessages > 0 ? ((openedMessages / deliveredMessages) * 100).toFixed(1) : "0";
 

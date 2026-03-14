@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import { subDays, startOfDay, endOfDay, startOfMonth, endOfMonth, format, differenceInDays } from "date-fns";
+import { subDays, startOfDay, endOfDay, format, differenceInDays } from "date-fns";
+import { z } from "zod";
 
-type Period = "7d" | "30d" | "90d" | "1y" | "custom";
+const querySchema = z.object({
+  period: z.enum(["7d", "30d", "90d", "1y", "custom"]).default("30d"),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});
+
+type Period = z.infer<typeof querySchema>["period"];
 
 function getDateRange(period: Period, startDate?: string, endDate?: string) {
   const now = new Date();
@@ -34,142 +41,58 @@ function getDateRange(period: Period, startDate?: string, endDate?: string) {
   return { start, end };
 }
 
+import { getAuthContext } from "@/lib/auth";
+
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user, member, organization } = await getAuthContext();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const member = await prisma.organizationMember.findFirst({
-      where: { userId: user.id },
-      include: { organization: true },
-    });
-
-    if (!member) {
+    if (!member || !organization) {
       return NextResponse.json({ error: "Organization not found" }, { status: 404 });
     }
 
     const orgId = member.organizationId;
-    const searchParams = request.nextUrl.searchParams;
-    const period = (searchParams.get("period") || "30d") as Period;
-    const startDate = searchParams.get("startDate") || undefined;
-    const endDate = searchParams.get("endDate") || undefined;
+    
+    // Validate Query Parameters
+    const searchParams = Object.fromEntries(request.nextUrl.searchParams);
+    const result = querySchema.safeParse(searchParams);
+    
+    if (!result.success) {
+      return NextResponse.json({ error: "Invalid query parameters", details: result.error.format() }, { status: 400 });
+    }
+
+    const { period, startDate, endDate } = result.data;
 
     const { start, end } = getDateRange(period, startDate, endDate);
     const previousStart = subDays(start, differenceInDays(end, start));
     const previousEnd = subDays(start, 1);
 
-    // Fetch all analytics data in parallel
+    // To prevent overwhelming the Prisma connection pool on Vercel (especially without PgBouncer),
+    // we split the heavy parallel queries into logical sequential batches.
+
+    // Batch 1: Core Customer & Growth Metrics
     const [
       customers,
       previousCustomers,
-      messages,
-      previousMessages,
-      campaigns,
-      visits,
-      previousVisits,
-      pointsTransactions,
-      previousPointsTransactions,
-      rewardClaims,
       customersByTier,
       customersByMonth,
-      messagesByDay,
-      visitsByDay,
-      loyaltyConfig,
     ] = await Promise.all([
-      // Current period customers
       prisma.customer.findMany({
-        where: {
-          organizationId: orgId,
-          createdAt: { gte: start, lte: end },
-        },
+        where: { organizationId: orgId, createdAt: { gte: start, lte: end } },
         select: { id: true, points: true, totalSpend: true, visits: true, tier: true, createdAt: true },
       }),
-      // Previous period customers
       prisma.customer.count({
-        where: {
-          organizationId: orgId,
-          createdAt: { gte: previousStart, lte: previousEnd },
-        },
+        where: { organizationId: orgId, createdAt: { gte: previousStart, lte: previousEnd } },
       }),
-      // Current period messages
-      prisma.message.findMany({
-        where: {
-          organizationId: orgId,
-          createdAt: { gte: start, lte: end },
-        },
-        select: { id: true, status: true, createdAt: true },
-      }),
-      // Previous period messages
-      prisma.message.count({
-        where: {
-          organizationId: orgId,
-          createdAt: { gte: previousStart, lte: previousEnd },
-        },
-      }),
-      // Campaigns
-      prisma.campaign.findMany({
-        where: { organizationId: orgId },
-        select: {
-          id: true,
-          name: true,
-          totalSent: true,
-          totalDelivered: true,
-          totalOpened: true,
-          totalClicked: true,
-          status: true,
-        },
-      }),
-      // Current period visits
-      prisma.visit.findMany({
-        where: {
-          customer: { organizationId: orgId },
-          createdAt: { gte: start, lte: end },
-        },
-        select: { amount: true, pointsEarned: true, customerId: true, createdAt: true, customer: { select: { organizationId: true } } },
-      }),
-      // Previous period visits
-      prisma.visit.findMany({
-        where: {
-          customer: { organizationId: orgId },
-          createdAt: { gte: previousStart, lte: previousEnd },
-        },
-        select: { amount: true, customer: { select: { organizationId: true } } },
-      }),
-      // Current period points transactions
-      prisma.pointsTransaction.findMany({
-        where: {
-          customer: { organizationId: orgId },
-          createdAt: { gte: start, lte: end },
-        },
-        select: { points: true, type: true, customer: { select: { organizationId: true } } },
-      }),
-      // Previous period points transactions
-      prisma.pointsTransaction.findMany({
-        where: {
-          customer: { organizationId: orgId },
-          createdAt: { gte: previousStart, lte: previousEnd },
-        },
-        select: { points: true, type: true, customer: { select: { organizationId: true } } },
-      }),
-      // Reward claims
-      prisma.rewardClaim.findMany({
-        where: {
-          reward: { organizationId: orgId },
-          claimedAt: { gte: start, lte: end },
-        },
-        select: { status: true, reward: { select: { name: true, pointsRequired: true } } },
-      }),
-      // Customers by tier
       prisma.customer.groupBy({
         by: ["tier"],
         where: { organizationId: orgId },
         _count: true,
       }),
-      // Customers by month (for cohort analysis)
       prisma.$queryRaw<Array<{ month: Date; count: bigint }>>`
         SELECT DATE_TRUNC('month', created_at) as month, COUNT(*) as count
         FROM customers
@@ -178,36 +101,72 @@ export async function GET(request: NextRequest) {
         ORDER BY month DESC
         LIMIT 12
       `,
-      // Messages by day
+    ]);
+
+    // Batch 2: Messages & Campaigns
+    const [
+      messages,
+      previousMessages,
+      campaigns,
+      messagesByDay,
+    ] = await Promise.all([
+      prisma.message.findMany({
+        where: { organizationId: orgId, createdAt: { gte: start, lte: end } },
+        select: { id: true, status: true, createdAt: true },
+      }),
+      prisma.message.count({
+        where: { organizationId: orgId, createdAt: { gte: previousStart, lte: previousEnd } },
+      }),
+      prisma.campaign.findMany({
+        where: { organizationId: orgId },
+        select: { id: true, name: true, totalSent: true, totalDelivered: true, totalOpened: true, totalClicked: true, status: true },
+      }),
       prisma.$queryRaw<Array<{ date: Date; sent: bigint; delivered: bigint; opened: bigint; clicked: bigint }>>`
-        SELECT 
-          DATE(created_at) as date,
-          COUNT(*) as sent,
-          COUNT(*) FILTER (WHERE status IN ('DELIVERED', 'OPENED', 'CLICKED')) as delivered,
-          COUNT(*) FILTER (WHERE status IN ('OPENED', 'CLICKED')) as opened,
-          COUNT(*) FILTER (WHERE status = 'CLICKED') as clicked
+        SELECT DATE(created_at) as date, COUNT(*) as sent, COUNT(*) FILTER (WHERE status IN ('DELIVERED', 'OPENED', 'CLICKED')) as delivered, COUNT(*) FILTER (WHERE status IN ('OPENED', 'CLICKED')) as opened, COUNT(*) FILTER (WHERE status = 'CLICKED') as clicked
         FROM messages
-        WHERE organization_id = ${orgId}
-          AND created_at >= ${start}
-          AND created_at <= ${end}
+        WHERE organization_id = ${orgId} AND created_at >= ${start} AND created_at <= ${end}
         GROUP BY DATE(created_at)
         ORDER BY date ASC
       `,
-      // Visits by day
+    ]);
+
+    // Batch 3: Revenue, Visits & Loyalty
+    const [
+      visits,
+      previousVisits,
+      pointsTransactions,
+      previousPointsTransactions,
+      rewardClaims,
+      visitsByDay,
+      loyaltyConfig,
+    ] = await Promise.all([
+      prisma.visit.findMany({
+        where: { customer: { organizationId: orgId }, createdAt: { gte: start, lte: end } },
+        select: { amount: true, pointsEarned: true, customerId: true, createdAt: true, customer: { select: { organizationId: true } } },
+      }),
+      prisma.visit.findMany({
+        where: { customer: { organizationId: orgId }, createdAt: { gte: previousStart, lte: previousEnd } },
+        select: { amount: true, customer: { select: { organizationId: true } } },
+      }),
+      prisma.pointsTransaction.findMany({
+        where: { customer: { organizationId: orgId }, createdAt: { gte: start, lte: end } },
+        select: { points: true, type: true, customer: { select: { organizationId: true } } },
+      }),
+      prisma.pointsTransaction.findMany({
+        where: { customer: { organizationId: orgId }, createdAt: { gte: previousStart, lte: previousEnd } },
+        select: { points: true, type: true, customer: { select: { organizationId: true } } },
+      }),
+      prisma.rewardClaim.findMany({
+        where: { reward: { organizationId: orgId }, claimedAt: { gte: start, lte: end } },
+        select: { status: true, reward: { select: { name: true, pointsRequired: true } } },
+      }),
       prisma.$queryRaw<Array<{ date: Date; visits: bigint; revenue: number }>>`
-        SELECT 
-          DATE(created_at) as date,
-          COUNT(*) as visits,
-          COALESCE(SUM(amount), 0) as revenue
-        FROM visits v
-        JOIN customers c ON v.customer_id = c.id
-        WHERE c.organization_id = ${orgId}
-          AND v.created_at >= ${start}
-          AND v.created_at <= ${end}
+        SELECT DATE(created_at) as date, COUNT(*) as visits, COALESCE(SUM(amount), 0) as revenue
+        FROM visits v JOIN customers c ON v.customer_id = c.id
+        WHERE c.organization_id = ${orgId} AND v.created_at >= ${start} AND v.created_at <= ${end}
         GROUP BY DATE(created_at)
         ORDER BY date ASC
       `,
-      // Loyalty config
       prisma.loyaltyConfig.findUnique({
         where: { organizationId: orgId },
       }),
@@ -219,21 +178,21 @@ export async function GET(request: NextRequest) {
     const customerGrowth = previousCustomers > 0 ? ((newCustomers - previousCustomers) / previousCustomers) * 100 : 0;
 
     const totalMessages = messages.length;
-    const deliveredMessages = messages.filter((m) => ["DELIVERED", "OPENED", "CLICKED"].includes(m.status)).length;
-    const openedMessages = messages.filter((m) => ["OPENED", "CLICKED"].includes(m.status)).length;
-    const clickedMessages = messages.filter((m) => m.status === "CLICKED").length;
+    const deliveredMessages = messages.filter((m: { status: string }) => ["DELIVERED", "OPENED", "CLICKED"].includes(m.status)).length;
+    const openedMessages = messages.filter((m: { status: string }) => ["OPENED", "CLICKED"].includes(m.status)).length;
+    const clickedMessages = messages.filter((m: { status: string }) => m.status === "CLICKED").length;
 
     const deliveryRate = totalMessages > 0 ? (deliveredMessages / totalMessages) * 100 : 0;
     const openRate = deliveredMessages > 0 ? (openedMessages / deliveredMessages) * 100 : 0;
     const clickRate = openedMessages > 0 ? (clickedMessages / openedMessages) * 100 : 0;
 
-    const totalRevenue = visits.reduce((sum, v) => sum + (v.amount || 0), 0);
-    const previousRevenue = previousVisits.reduce((sum, v) => sum + (v.amount || 0), 0);
+    const totalRevenue = visits.reduce((sum: number, v: { amount: number }) => sum + (v.amount || 0), 0);
+    const previousRevenue = previousVisits.reduce((sum: number, v: { amount: number }) => sum + (v.amount || 0), 0);
     const revenueGrowth = previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
 
-    const pointsEarned = pointsTransactions.filter((p) => p.type === "EARN").reduce((sum, p) => sum + p.points, 0);
-    const pointsRedeemed = pointsTransactions.filter((p) => p.type === "REDEEM").reduce((sum, p) => sum + p.points, 0);
-    const previousPointsEarned = previousPointsTransactions.filter((p) => p.type === "EARN").reduce((sum, p) => sum + p.points, 0);
+    const pointsEarned = pointsTransactions.filter((p: { type: string }) => p.type === "EARN").reduce((sum: number, p: { points: number }) => sum + p.points, 0);
+    const pointsRedeemed = pointsTransactions.filter((p: { type: string }) => p.type === "REDEEM").reduce((sum: number, p: { points: number }) => sum + p.points, 0);
+    const previousPointsEarned = previousPointsTransactions.filter((p: { type: string }) => p.type === "EARN").reduce((sum: number, p: { points: number }) => sum + p.points, 0);
     const pointsGrowth = previousPointsEarned > 0 ? ((pointsEarned - previousPointsEarned) / previousPointsEarned) * 100 : 0;
 
     const totalVisits = visits.length;
@@ -241,12 +200,12 @@ export async function GET(request: NextRequest) {
     const visitGrowth = previousTotalVisits > 0 ? ((totalVisits - previousTotalVisits) / previousTotalVisits) * 100 : 0;
 
     // Calculate ROI
-    const avgCustomerValue = totalCustomers > 0 ? customers.reduce((sum, c) => sum + c.totalSpend, 0) / totalCustomers : 0;
-    const avgVisitsPerCustomer = totalCustomers > 0 ? customers.reduce((sum, c) => sum + c.visits, 0) / totalCustomers : 0;
-    const retentionRate = totalCustomers > 0 ? (customers.filter((c) => c.visits > 1).length / totalCustomers) * 100 : 0;
+    const avgCustomerValue = totalCustomers > 0 ? customers.reduce((sum: number, c: { totalSpend: number }) => sum + c.totalSpend, 0) / totalCustomers : 0;
+    const avgVisitsPerCustomer = totalCustomers > 0 ? customers.reduce((sum: number, c: { visits: number }) => sum + c.visits, 0) / totalCustomers : 0;
+    const retentionRate = totalCustomers > 0 ? (customers.filter((c: { visits: number }) => c.visits > 1).length / totalCustomers) * 100 : 0;
     
     // Estimate investment (loyalty program costs - rewards, messaging, etc.)
-    const rewardsCost = rewardClaims.filter((r) => r.status === "REDEEMED").reduce((sum, r) => sum + (r.reward?.pointsRequired || 0), 0) * 0.01; // Assume 1 cent per point
+    const rewardsCost = rewardClaims.filter((r: { status: string }) => r.status === "REDEEMED").reduce((sum: number, r: { reward: { pointsRequired: number } | null }) => sum + (r.reward?.pointsRequired || 0), 0) * 0.01; // Assume 1 cent per point
     const messagingCost = totalMessages * 0.001; // Assume 0.1 cent per message
     const totalInvestment = rewardsCost + messagingCost + 50; // Base platform cost
     const roi = totalInvestment > 0 ? ((totalRevenue - totalInvestment) / totalInvestment) * 100 : 0;
@@ -254,7 +213,7 @@ export async function GET(request: NextRequest) {
     // Customer growth by day
     const customerGrowthByDay = Array.from({ length: differenceInDays(end, start) + 1 }, (_, i) => {
       const date = subDays(end, differenceInDays(end, start) - i);
-      const dayCustomers = customers.filter((c) => format(new Date(c.createdAt), "yyyy-MM-dd") === format(date, "yyyy-MM-dd"));
+      const dayCustomers = customers.filter((c: { createdAt: Date }) => format(new Date(c.createdAt), "yyyy-MM-dd") === format(date, "yyyy-MM-dd"));
       return {
         date: format(date, "MMM dd"),
         newCustomers: dayCustomers.length,
@@ -264,7 +223,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Messages chart data
-    const messagesChartData = messagesByDay.map((d) => ({
+    const messagesChartData = messagesByDay.map((d: { date: Date; sent: bigint; delivered: bigint; opened: bigint; clicked: bigint }) => ({
       date: format(new Date(d.date), "MMM dd"),
       sent: Number(d.sent),
       delivered: Number(d.delivered),
@@ -273,14 +232,14 @@ export async function GET(request: NextRequest) {
     }));
 
     // Revenue chart data
-    const revenueChartData = visitsByDay.map((d) => ({
+    const revenueChartData = visitsByDay.map((d: { date: Date; revenue: number; visits: bigint }) => ({
       date: format(new Date(d.date), "MMM dd"),
       revenue: Number(d.revenue),
       visits: Number(d.visits),
     }));
 
     // Campaign performance
-    const campaignPerformance = campaigns.slice(0, 10).map((c) => ({
+    const campaignPerformance = campaigns.slice(0, 10).map((c: { name: string; totalSent: number; totalDelivered: number; totalOpened: number; totalClicked: number }) => ({
       name: c.name,
       sent: c.totalSent,
       delivered: c.totalDelivered,
@@ -292,14 +251,14 @@ export async function GET(request: NextRequest) {
     const cohortData = await calculateCohortAnalysis(orgId, start, end);
 
     // Tier distribution
-    const tierDistribution = customersByTier.reduce((acc, t) => {
+    const tierDistribution = customersByTier.reduce((acc: Record<string, number>, t: { tier: string | null; _count: number }) => {
       acc[t.tier || "No Tier"] = t._count;
       return acc;
     }, {} as Record<string, number>);
 
     // Top rewards
     const rewardStats = new Map<string, { claims: number; redemptions: number }>();
-    rewardClaims.forEach((r) => {
+    rewardClaims.forEach((r: { reward: { name: string } | null; status: string }) => {
       const name = r.reward?.name || "Unknown";
       const stats = rewardStats.get(name) || { claims: 0, redemptions: 0 };
       stats.claims++;
@@ -363,71 +322,102 @@ export async function GET(request: NextRequest) {
 }
 
 async function calculateCohortAnalysis(orgId: string, _start: Date, _end: Date) {
-  // Get customers grouped by their signup month
-  const customersByCohort = await prisma.$queryRaw<
-    Array<{ cohortMonth: Date; customerId: string; signupDate: Date; lastVisit: Date | null; totalVisits: number; totalSpend: number }>
+  // A true cohort analysis query. 
+  // 1. Assign each customer a cohort month (their first visit or signup date).
+  // 2. For every visit they make, calculate how many months after their cohort month it occurred (month_number).
+  // 3. Aggregate to find total customers per cohort and distinct customers active in each month_number.
+  
+  const cohortData = await prisma.$queryRaw<
+    Array<{
+      cohort_month: Date;
+      total_customers: bigint;
+      month_number: number;
+      active_customers: bigint;
+    }>
   >`
     WITH customer_cohorts AS (
       SELECT 
-        c.id as customer_id,
-        DATE_TRUNC('month', c.created_at) as cohort_month,
-        c.created_at as signup_date,
-        MAX(v.created_at) as last_visit,
-        COUNT(v.id) as total_visits,
-        COALESCE(SUM(v.amount), 0) as total_spend
-      FROM customers c
-      LEFT JOIN visits v ON c.id = v.customer_id
-      WHERE c.organization_id = ${orgId}
-      GROUP BY c.id, DATE_TRUNC('month', c.created_at)
+        id as customer_id,
+        -- Use the signup date truncated to month as the cohort
+        DATE_TRUNC('month', created_at) as cohort_month
+      FROM customers
+      WHERE organization_id = ${orgId}
+    ),
+    cohort_sizes AS (
+      SELECT 
+        cohort_month,
+        COUNT(customer_id) as total_customers
+      FROM customer_cohorts
+      GROUP BY cohort_month
+    ),
+    customer_activity AS (
+      SELECT 
+        c.cohort_month,
+        c.customer_id,
+        -- Calculate the difference in months between the visit and the cohort month
+        -- (Year diff * 12) + Month diff
+        EXTRACT(YEAR FROM AGE(DATE_TRUNC('month', v.created_at), c.cohort_month)) * 12 +
+        EXTRACT(MONTH FROM AGE(DATE_TRUNC('month', v.created_at), c.cohort_month)) as month_number
+      FROM customer_cohorts c
+      JOIN visits v ON c.customer_id = v.customer_id
+    ),
+    monthly_retention AS (
+      SELECT 
+        cohort_month,
+        month_number,
+        COUNT(DISTINCT customer_id) as active_customers
+      FROM customer_activity
+      -- Only look at up to 11 months after signup
+      WHERE month_number >= 0 AND month_number <= 11
+      GROUP BY cohort_month, month_number
     )
     SELECT 
-      cohort_month,
-      customer_id,
-      signup_date,
-      last_visit,
-      total_visits,
-      total_spend
-    FROM customer_cohorts
-    ORDER BY cohort_month DESC
-    LIMIT 500
+      s.cohort_month,
+      s.total_customers,
+      CAST(r.month_number AS INTEGER) as month_number,
+      CAST(r.active_customers AS BIGINT) as active_customers
+    FROM cohort_sizes s
+    LEFT JOIN monthly_retention r ON s.cohort_month = r.cohort_month
+    ORDER BY s.cohort_month DESC, r.month_number ASC
+    LIMIT 200
   `;
 
-  // Group by cohort month
-  const cohortMap = new Map<string, { customers: Set<string>; retentionData: Map<number, Set<string>>; revenue: number[] }>();
+  // Format the raw SQL result into the expected array structure
+  const formattedCohorts = new Map<string, { customers: number; retentionRates: (number | null)[] }>();
 
-  customersByCohort.forEach((c) => {
-    const cohortKey = format(new Date(c.cohortMonth), "MMM yyyy");
-    if (!cohortMap.has(cohortKey)) {
-      cohortMap.set(cohortKey, {
-        customers: new Set(),
-        retentionData: new Map(),
-        revenue: [],
+  cohortData.forEach((row: { cohort_month: Date; total_customers: bigint; month_number: number; active_customers: bigint }) => {
+    const cohortKey = format(new Date(row.cohort_month), "MMM yyyy");
+    
+    if (!formattedCohorts.has(cohortKey)) {
+      // Initialize with 12 months of nulls
+      formattedCohorts.set(cohortKey, {
+        customers: Number(row.total_customers),
+        retentionRates: Array(12).fill(null),
       });
     }
-    const cohort = cohortMap.get(cohortKey)!;
-    cohort.customers.add(c.customerId);
-    cohort.revenue.push(Number(c.totalSpend));
+
+    const cohort = formattedCohorts.get(cohortKey)!;
+    
+    // Day 0 (month 0) is always 100% or based on real initial activity?
+    // In typical cohorts, month 0 is 100%. If they visited in month X, we calculate %.
+    if (row.month_number === 0) {
+       cohort.retentionRates[0] = 100;
+    } else if (row.month_number !== null && row.month_number > 0 && row.month_number < 12) {
+      // Calculate percentage
+      const total = cohort.customers;
+      const active = Number(row.active_customers);
+      cohort.retentionRates[row.month_number] = total > 0 ? Math.round((active / total) * 100) : 0;
+    }
   });
 
-  // Calculate retention for each month
-  const cohorts = Array.from(cohortMap.entries())
-    .slice(0, 12)
-    .map(([cohortMonth, data]) => {
-      const customers = data.customers.size;
-      const retentionRates: (number | null)[] = [100]; // Month 0 is always 100%
+  // Ensure Month 0 is always 100 even if they had no visit explicitly recorded in that month
+  Array.from(formattedCohorts.values()).forEach(c => c.retentionRates[0] = 100);
 
-      // For subsequent months, calculate retention based on activity
-      for (let month = 1; month <= 11; month++) {
-        const activeInMonth = Math.floor(customers * (0.7 - month * 0.05)); // Simplified retention model
-        retentionRates.push(customers > 0 ? Math.max(0, Math.round((activeInMonth / customers) * 100)) : null);
-      }
-
-      return {
-        cohortMonth,
-        customers,
-        retentionRates,
-      };
-    });
-
-  return cohorts;
+  return Array.from(formattedCohorts.entries())
+    .map(([cohortMonth, data]) => ({
+      cohortMonth,
+      customers: data.customers,
+      retentionRates: data.retentionRates,
+    }))
+    .slice(0, 12); // Return top 12 cohorts
 }

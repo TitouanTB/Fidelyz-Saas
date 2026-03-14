@@ -1,0 +1,78 @@
+﻿src/app/api/analytics/export/route.ts(126,5): error TS2552: Cannot find name 'orgVisits'. Did you mean 'visits'?
+src/app/api/analytics/export/route.ts(128,5): error TS2552: Cannot find name 'orgPointsTransactions'. Did you mean 'pointsTransactions'?
+src/app/api/analytics/export/route.ts(130,5): error TS2552: Cannot find name 'orgPointsTransactions'. Did you mean 'pointsTransactions'?
+src/app/api/analytics/export/route.ts(136,37): error TS2552: Cannot find name 'orgVisits'. Did you mean 'visits'?
+src/app/api/analytics/export/route.ts(137,44): error TS2552: Cannot find name 'orgVisits'. Did you mean 'visits'?
+src/app/api/analytics/export/route.ts(137,87): error TS2552: Cannot find name 'orgVisits'. Did you mean 'visits'?
+src/app/api/analytics/export/route.ts(152,17): error TS2552: Cannot find name 'orgVisits'. Did you mean 'visits'?
+src/app/api/analytics/export/route.ts(153,29): error TS2552: Cannot find name 'orgPointsTransactions'. Did you mean 'pointsTransactions'?
+src/app/api/analytics/export/route.ts(174,17): error TS2552: Cannot find name 'orgVisits'. Did you mean 'visits'?
+src/app/api/analytics/export/route.ts(175,29): error TS2552: Cannot find name 'orgPointsTransactions'. Did you mean 'pointsTransactions'?
+src/app/api/cron/reward-reminders/route.ts(137,33): error TS18046: 'customers' is of type 'unknown'.
+src/components/onboarding/onboarding-wizard.tsx(11,18): error TS2304: Cannot find name 'NativeSelect'.
+src/components/onboarding/onboarding-wizard.tsx(13,28): error TS2448: Block-scoped variable 'INDUSTRIES' used before its declaration.
+src/components/onboarding/onboarding-wizard.tsx(13,28): error TS2454: Variable 'INDUSTRIES' is used before being assigned.
+src/components/onboarding/onboarding-wizard.tsx(14,26): error TS2552: Cannot find name 'errors'. Did you mean 'Error'?
+src/components/onboarding/onboarding-wizard.tsx(15,23): error TS2304: Cannot find name 'register'.
+src/components/onboarding/onboarding-wizard.tsx(451,18): error TS2552: Cannot find name 'Select'. Did you mean 'onselect'?
+src/components/public/digital-menu.tsx(65,22): error TS18048: 'menuData.categories.length' is possibly 'undefined'.
+src/components/public/digital-menu.tsx(66,7): error TS18048: 'menuData' is possibly 'undefined'.
+src/components/public/digital-menu.tsx(218,74): error TS2322: Type '{ className: string; title: string; }' is not assignable to type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+src/components/public/digital-menu.tsx(221,73): error TS2322: Type '{ className: string; title: string; }' is not assignable to type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+src/components/public/reward-flow.tsx(512,49): error TS18049: 'organization.whatsappNumber' is possibly 'null' or 'undefined'.
+src/lib/ai.ts(91,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/lib/ai.ts(143,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/lib/ai.ts(209,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/lib/ai.ts(259,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/lib/ai.ts(302,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/lib/events.ts(44,7): error TS2322: Type 'Record<string, unknown> | undefined' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+  Type 'Record<string, unknown>' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+    Type 'Record<string, unknown>' is missing the following properties from type 'readonly (InputJsonValue | null)[]': length, concat, join, slice, and 26 more.
+src/lib/index.ts(4,10): error TS2459: Module '"./twilio"' declares 'twilioClient' locally, but it is not exported.
+src/lib/index.ts(5,10): error TS2305: Module '"./resend"' has no exported member 'resend'.
+src/lib/index.ts(6,10): error TS2724: '"./ai"' has no exported member named 'genAI'. Did you mean 'getAI'?
+src/lib/index.ts(6,17): error TS2305: Module '"./ai"' has no exported member 'model'.
+src/lib/index.ts(6,24): error TS2724: '"./ai"' has no exported member named 'generateCampaignSuggestion'. Did you mean 'generateAISuggestions'?
+src/lib/index.ts(6,52): error TS2305: Module '"./ai"' has no exported member 'analyzeCustomerData'.
+src/lib/index.ts(6,73): error TS2724: '"./ai"' has no exported member named 'generateEmailContent'. Did you mean 'generateAIContent'?
+src/lib/messaging.ts(179,16): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/messaging.ts(179,43): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/messaging.ts(184,16): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/messaging.ts(184,42): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/stripe.ts(252,5): error TS2345: Argument of type '{ data: never[]; has_more: false; }' is not assignable to parameter of type 'Response<ApiList<Invoice>>'.
+  Type '{ data: never[]; has_more: false; }' is missing the following properties from type 'ApiList<Invoice>': object, url
+src/lib/twilio.ts(92,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/lib/twilio.ts(134,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/lib/twilio.ts(174,7): error TS2322: Type 'false' is not assignable to type 'true'.
+src/proxy.ts(31,18): error TS2554: Expected 3 arguments, but got 2.
+src/test/e2e/pages.spec.ts(63,53): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type '{ checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | ... 1 more ... | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; }'.
+src/test/store/organization-store.test.ts(28,60): error TS2345: Argument of type '{ id: string; name: string; slug: string; plan: "FREE"; }' is not assignable to parameter of type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }'.
+  Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(40,54): error TS2345: Argument of type '{ id: string; name: string; slug: string; plan: "FREE"; }[]' is not assignable to parameter of type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }[]'.
+  Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(48,53): error TS2345: Argument of type '{ id: string; name: string; slug: string; plan: "FREE"; }' is not assignable to parameter of type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }'.
+  Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(57,23): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(58,7): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(70,23): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(71,7): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(83,9): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(84,9): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(86,7): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(99,23): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/test/store/organization-store.test.ts(100,7): error TS2740: Type '{ id: string; name: string; slug: string; plan: "FREE"; }' is missing the following properties from type '{ name: string; id: string; createdAt: Date; updatedAt: Date; slug: string; logoUrl: string | null; primaryColor: string; industry: string | null; description: string | null; ... 9 more ...; plan: Plan; }': createdAt, updatedAt, logoUrl, primaryColor, and 11 more.
+src/types/index.ts(137,12): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(145,21): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(153,16): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(154,15): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(161,13): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(167,14): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(173,13): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(177,23): error TS2304: Cannot find name 'Channel'.
+src/types/index.ts(187,21): error TS2304: Cannot find name 'Channel'.

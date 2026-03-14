@@ -8,13 +8,8 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-                <NativeSelect
-                  label="Industry"
-                  options={INDUSTRIES}
-                  error={errors.industry?.message}
-                  {...register("industry")}
-                />
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { NativeSelect } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { generateSlug } from "@/lib/utils";
@@ -448,7 +443,7 @@ export function OnboardingWizard() {
                   {...register("organizationName")}
                 />
                 
-                <Select
+                <NativeSelect
                   label="Industry"
                   options={INDUSTRIES}
                   error={errors.industry?.message}

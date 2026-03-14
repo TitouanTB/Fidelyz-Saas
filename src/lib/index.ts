@@ -1,9 +1,9 @@
 export { prisma } from "./prisma";
 export { stripe, PLANS, getStripePrice, createCheckoutSession, createBillingPortalSession, handleWebhookEvent } from "./stripe";
 export type { PlanKey } from "./stripe";
-export { twilioClient, sendSMS, sendWhatsApp, sendWhatsAppFromRestaurant, sendBulkSMS } from "./twilio";
-export { resend, sendEmail, sendBulkEmail, sendTemplateEmail } from "./resend";
-export { genAI, model, generateCampaignSuggestion, analyzeCustomerData, generateEmailContent } from "./ai";
+export { getTwilio, sendSMS, sendWhatsApp, sendWhatsAppFromRestaurant, sendBulkSMS, isSMSAvailable, isWhatsAppAvailable } from "./twilio";
+export { getResend, sendEmail, sendBulkEmail, sendTemplateEmail, isEmailAvailable } from "./resend";
+export { getAI, generateAIContent, generateAIImage, generateAISuggestions, generateAdaptedRewards, generateBrandingSuggestion, generateMiniSiteContent, isAIAvailable } from "./ai";
 export { cn, formatCurrency, formatDate, formatRelativeDate, generateSlug, truncate, getInitials } from "./utils";
 export { createClient, getSupabaseBrowserClient, getAuthUser, getAuthSession, signOut } from "./supabase";
 export type { SupabaseClient, User, Session } from "./supabase";

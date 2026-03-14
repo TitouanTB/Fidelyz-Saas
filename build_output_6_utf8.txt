@@ -1,0 +1,58 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 25.7s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/lib/events.ts:44:7
+Type error: Type 
+'Record<string, unknown> | 
+undefined' is not assignable to 
+type 
+'NullableJsonNullValueInput | 
+InputJsonValue | undefined'.
+  Type 'Record<string, 
+unknown>' is not assignable to 
+type 
+'NullableJsonNullValueInput | 
+InputJsonValue | undefined'.
+    Type 'Record<string, 
+unknown>' is missing the 
+following properties from type 
+'readonly (InputJsonValue | 
+null)[]': length, concat, join, 
+slice, and 26 more.
+
+[0m [90m 42 |[39m       
+type[33m,[39m
+ [90m 43 |[39m       
+eventName[33m,[39m
+[31m[1m>[22m[39m[90m 44 
+|[39m       
+properties[33m,[39m
+ [90m    |[39m       
+[31m[1m^[22m[39m
+ [90m 45 |[39m       
+sessionId[33m,[39m
+ [90m 46 |[39m       
+visitorId[33m,[39m
+ [90m 47 |[39m       
+userAgent[33m,[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null

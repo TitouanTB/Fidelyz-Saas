@@ -1,0 +1,60 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬À serverActions
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 18.8s
+  Running TypeScript ...
+node.exe : Failed to compile.
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : N 
+   otSpecified: (Failed to com  
+  pile.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : N 
+   ativeCommandError
+ 
+
+./src/components/public/reward-f
+low.tsx:512:49
+Type error: 
+'organization.whatsappNumber' 
+is possibly 'null' or 
+'undefined'.
+
+[0m [90m 510 |[39m           
+        onClick[33m=[39m{() 
+[33m=>[39m {
+ [90m 511 |[39m               
+      [36mconst[39m message 
+[33m=[39m encodeURIComponent(
+[32m`FIDELYZ-${organization.slug
+}`[39m)[33m;[39m
+[31m[1m>[22m[39m[90m 512 
+|[39m                     
+[36mconst[39m 
+cleanWhatsAppNumber [33m=[39m 
+organization[33m.[39mwhatsappN
+umber[33m.[39mreplace([35m/\D
+/g[39m[33m,[39m 
+[32m""[39m)[33m;[39m
+ [90m     |[39m               
+                                
+  [31m[1m^[22m[39m
+ [90m 513 |[39m               
+      window[33m.[39mopen([32
+m`https://wa.me/${cleanWhatsAppN
+umber}?text=${message}`[39m[33
+m,[39m 
+[32m"_blank"[39m)[33m;[39m
+ [90m 514 |[39m               
+    }}
+ [90m 515 |[39m               
+  [33m>[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null
