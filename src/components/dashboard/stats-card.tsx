@@ -9,24 +9,29 @@ interface StatsCardProps {
   iconColor?: string;
 }
 
-export function StatsCard({ title, value, change, icon: Icon, iconColor = "text-indigo-600" }: StatsCardProps) {
+export function StatsCard({ title, value, change, icon: Icon }: StatsCardProps) {
   const isPositive = change !== undefined && change >= 0;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div className="glass-surface p-6 rounded-2xl group cursor-default transition-all duration-300 hover:border-violet-default/30">
       <div className="flex items-center justify-between mb-4">
-        <div className={cn("p-2 rounded-lg bg-gray-50", iconColor)}>
-          <Icon size={20} />
+        <span className="text-xs font-medium tracking-widest uppercase text-text-secondary">
+          {title}
+        </span>
+        <div className="w-8 h-8 rounded-lg bg-violet-default/8 flex items-center justify-center group-hover:bg-violet-default/15 transition-colors border border-violet-default/10">
+          <Icon className="w-4 h-4 text-violet-default" />
         </div>
-        {change !== undefined && (
-          <div className={cn("flex items-center gap-1 text-xs font-medium", isPositive ? "text-green-600" : "text-red-600")}>
-            {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-            {Math.abs(change)}%
-          </div>
-        )}
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-500 mt-1">{title}</p>
+      <div className="text-3xl font-bold font-heading text-text-primary tracking-tight mb-1">
+        {value}
+      </div>
+      {change !== undefined && (
+        <div className={cn("text-xs flex items-center gap-1", isPositive ? "text-success" : "text-danger")}>
+          {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+          <span>{isPositive ? "+" : ""}{change}%</span>
+          <span className="text-text-tertiary ml-1">vs mois dernier</span>
+        </div>
+      )}
     </div>
   );
 }

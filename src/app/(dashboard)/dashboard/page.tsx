@@ -1,9 +1,12 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { StatsCard } from "@/components/dashboard/stats-card";
-import { Users, Megaphone, MessageSquare, Star, BarChart3, TrendingUp } from "lucide-react";
+import { Users, Megaphone, MessageSquare, Star, BarChart3, TrendingUp, CheckCircle, UtensilsCrossed, QrCode } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { getAuthContext } from "@/lib/auth";
+import { DashboardChart } from "@/components/dashboard/dashboard-charts";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Dashboard - Fidelyz" };
 
@@ -25,71 +28,93 @@ async function getDashboardData(orgId: string) {
 
   const openRate = messages > 0 ? Math.round((openedMessages / messages) * 100) : 0;
 
+  // Mock data for the chart
+  const chartData = [
+    { date: "01/03", count: 12 },
+    { date: "05/03", count: 18 },
+    { date: "10/03", count: 15 },
+    { date: "15/03", count: 25 },
+    { date: "20/03", count: 32 },
+    { date: "25/03", count: 28 },
+    { date: "30/03", count: 40 },
+  ];
+
   return {
     stats: { customers, campaigns, messages, openRate },
     recentCustomers,
+    chartData,
   };
 }
 
 export default async function DashboardPage() {
   const { user, organization } = await getAuthContext({ redirectIfNotFound: true });
   
-  // organization is guaranteed to be non-null here due to redirectIfNotFound: true
-  // but we add a check for TypeScript safety
   if (!organization) return null;
 
   const data = await getDashboardData(organization.id);
+  const { stats, recentCustomers, chartData } = data;
 
-  if (!data) {
-    // This should technically not happen if getAuthContext worked as expected
-    // but we'll leave a failsafe
-    return <div>Failed to load dashboard data</div>;
-  }
-
-  const { stats, recentCustomers } = data;
+  const firstName = user?.user_metadata?.first_name || "Admin";
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Welcome back, {organization.name}</p>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">
+          Bonjour, {firstName} 👋
+        </h1>
+        <p className="text-text-secondary text-base">
+          Voici le résumé de votre programme de fidélité pour aujourd'hui.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard title="Total Customers" value={stats.customers} icon={Users} iconColor="text-blue-600" change={12} />
-        <StatsCard title="Campaigns" value={stats.campaigns} icon={Megaphone} iconColor="text-purple-600" />
-        <StatsCard title="Messages Sent" value={stats.messages} icon={MessageSquare} iconColor="text-green-600" change={8} />
-        <StatsCard title="Open Rate" value={`${stats.openRate}%`} icon={BarChart3} iconColor="text-orange-600" change={3} />
+        <StatsCard title="Clients total" value={stats.customers} icon={Users} change={12} />
+        <StatsCard title="Visites ce mois" value={stats.messages * 2} icon={BarChart3} change={8} />
+        <StatsCard title="Récompenses" value={stats.campaigns * 5} icon={Star} change={-2} />
+        <StatsCard title="Taux de retour" value={`${stats.openRate}%`} icon={TrendingUp} change={3} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Customers</h2>
-            <a href="/customers" className="text-sm text-indigo-600 hover:underline">View all</a>
+      <div className="glass-surface p-8 rounded-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold font-heading text-text-primary">Visites (30 derniers jours)</h2>
+          <span className="text-xs font-medium text-text-tertiary uppercase tracking-widest">Temps réel</span>
+        </div>
+        <DashboardChart data={chartData} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 glass-surface p-6 rounded-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold font-heading text-text-primary">Derniers clients</h2>
+            <Link href="/customers" className="text-sm text-violet-default hover:underline">Voir tout</Link>
           </div>
+          
           {recentCustomers.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Users size={32} className="mx-auto mb-2 opacity-40" />
-              <p className="text-sm">No customers yet</p>
-              <a href="/customers" className="text-sm text-indigo-600 hover:underline mt-2 inline-block">Import customers</a>
+            <div className="text-center py-12 text-text-tertiary">
+              <Users size={48} className="mx-auto mb-4 opacity-20" />
+              <p>Aucun client pour le moment</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {recentCustomers.map((c: any) => (
-                <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` : c.email}
-                    </p>
-                    <p className="text-xs text-gray-500">{c.email}</p>
+                <div key={c.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-violet-default/10 flex items-center justify-center text-violet-default font-bold border border-violet-default/20">
+                      {c.firstName?.[0] || c.email?.[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-text-primary">
+                        {c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` : c.email}
+                      </p>
+                      <p className="text-xs text-text-tertiary">{c.email}</p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <div className="flex items-center gap-1 text-yellow-500">
-                      <Star size={12} />
-                      <span className="text-xs font-medium text-gray-700">{c.points} pts</span>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <Star size={14} className="text-violet-default" />
+                      <span className="text-sm font-bold text-text-primary">{c.points} pts</span>
                     </div>
-                    <p className="text-xs text-gray-400">{formatDate(c.createdAt)}</p>
+                    <p className="text-xs text-text-tertiary mt-0.5">{formatDate(c.createdAt)}</p>
                   </div>
                 </div>
               ))}
@@ -97,25 +122,25 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="glass-surface p-6 rounded-2xl">
+          <h2 className="text-xl font-bold font-heading text-text-primary mb-6">Actions rapides</h2>
+          <div className="space-y-3">
             {[
-              { label: "Create Campaign", href: "/campaigns/new", icon: Megaphone, color: "bg-purple-50 text-purple-700" },
-              { label: "Add Customer", href: "/customers/new", icon: Users, color: "bg-blue-50 text-blue-700" },
-              { label: "View Analytics", href: "/analytics", icon: TrendingUp, color: "bg-green-50 text-green-700" },
-              { label: "Send Message", href: "/messages/new", icon: MessageSquare, color: "bg-orange-50 text-orange-700" },
+              { label: "Valider une visite", href: "/dashboard/validate", icon: CheckCircle },
+              { label: "Partager QR Code", href: "/dashboard/qr-code", icon: QrCode },
+              { label: "Menu digital", href: "/dashboard/menu", icon: UtensilsCrossed },
+              { label: "Personnaliser", href: "/dashboard/apparence", icon: Megaphone },
             ].map((action) => (
-              <a
+              <Link
                 key={action.href}
                 href={action.href}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity`}
+                className="flex items-center gap-3 p-4 rounded-xl border border-white/5 bg-white/4 hover:bg-violet-default/10 hover:border-violet-default/20 transition-all group"
               >
-                <action.icon size={24} />
-                <span className="text-sm font-medium text-center">{action.label}</span>
-              </a>
+                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-violet-default/20 transition-colors">
+                  <action.icon size={20} className="text-text-secondary group-hover:text-violet-default" />
+                </div>
+                <span className="text-sm font-semibold text-text-secondary group-hover:text-text-primary">{action.label}</span>
+              </Link>
             ))}
           </div>
         </div>
@@ -123,3 +148,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+

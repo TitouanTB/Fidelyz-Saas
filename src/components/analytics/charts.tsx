@@ -31,11 +31,11 @@ interface ChartContainerProps {
 
 export function ChartContainer({ title, description, children, className, action }: ChartContainerProps) {
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <Card className={`glass-surface border-white/5 rounded-2xl overflow-hidden ${className}`}>
+      <CardHeader className="flex flex-row items-center justify-between pb-6">
         <div>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
+          <CardTitle className="text-xl font-bold font-heading text-text-primary">{title}</CardTitle>
+          {description && <CardDescription className="text-text-tertiary mt-1">{description}</CardDescription>}
         </div>
         {action}
       </CardHeader>
@@ -43,6 +43,28 @@ export function ChartContainer({ title, description, children, className, action
     </Card>
   );
 }
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[#1a1a1f]/80 backdrop-blur-xl border border-white/10 p-4 rounded-xl shadow-2xl">
+        <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-2">{label}</p>
+        <div className="space-y-1.5">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
+              <span className="text-sm font-medium text-text-secondary">{entry.name}:</span>
+              <span className="text-sm font-bold text-text-primary ml-auto">
+                {typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 interface LineChartData {
   date: string;
@@ -65,19 +87,28 @@ export function LineChartWidget({ title, description, data, lines, height = 300 
   return (
     <ChartContainer title={title} description={description}>
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9ca3af" />
-          <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-            }}
+        <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+          <XAxis 
+            dataKey="date" 
+            tick={{ fontSize: 10, fill: '#7b7b8f' }} 
+            axisLine={false}
+            tickLine={false}
+            dy={10}
           />
-          <Legend />
+          <YAxis 
+            tick={{ fontSize: 10, fill: '#7b7b8f' }} 
+            axisLine={false}
+            tickLine={false}
+            dx={-10}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend 
+            verticalAlign="top" 
+            align="right" 
+            iconType="circle"
+            wrapperStyle={{ paddingBottom: '20px', fontSize: '11px', fontWeight: 'bold', color: '#7b7b8f' }}
+          />
           {lines.map((line, index) => (
             <Line
               key={line.dataKey}
@@ -85,9 +116,9 @@ export function LineChartWidget({ title, description, data, lines, height = 300 
               dataKey={line.dataKey}
               name={line.name}
               stroke={line.color || COLORS[index % COLORS.length]}
-              strokeWidth={2}
-              dot={{ fill: line.color || COLORS[index % COLORS.length], strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 6, strokeWidth: 0, fill: line.color || COLORS[index % COLORS.length] }}
             />
           ))}
         </LineChart>
@@ -112,7 +143,7 @@ export function AreaChartWidget({ title, description, data, areas, height = 300 
   return (
     <ChartContainer title={title} description={description}>
       <ResponsiveContainer width="100%" height={height}>
-        <AreaChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
           <defs>
             {areas.map((area, index) => (
               <linearGradient
@@ -136,18 +167,11 @@ export function AreaChartWidget({ title, description, data, areas, height = 300 
               </linearGradient>
             ))}
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9ca3af" />
-          <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-            }}
-          />
-          <Legend />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+          <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} dy={10} />
+          <YAxis tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} dx={-10} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px', fontSize: '11px', fontWeight: 'bold' }} />
           {areas.map((area, index) => (
             <Area
               key={area.dataKey}
@@ -155,7 +179,7 @@ export function AreaChartWidget({ title, description, data, areas, height = 300 
               dataKey={area.dataKey}
               name={area.name}
               stroke={area.color || COLORS[index % COLORS.length]}
-              strokeWidth={2}
+              strokeWidth={3}
               fillOpacity={1}
               fill={`url(#gradient-${area.dataKey})`}
             />
@@ -197,29 +221,22 @@ export function BarChartWidget({
         <BarChart
           data={data}
           layout={layout}
-          margin={{ top: 5, right: 30, left: isVertical ? 80 : 20, bottom: 5 }}
+          margin={{ top: 5, right: 10, left: isVertical ? 40 : 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} horizontal={!isVertical} />
           {isVertical ? (
             <>
-              <XAxis type="number" tick={{ fontSize: 12 }} stroke="#9ca3af" />
-              <YAxis type="category" dataKey={xKey} tick={{ fontSize: 12 }} stroke="#9ca3af" width={70} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey={xKey} tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} width={80} />
             </>
           ) : (
             <>
-              <XAxis dataKey={xKey} tick={{ fontSize: 12 }} stroke="#9ca3af" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
+              <XAxis dataKey={xKey} tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} dy={10} />
+              <YAxis tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} dx={-10} />
             </>
           )}
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-            }}
-          />
-          <Legend />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px', fontSize: '11px', fontWeight: 'bold' }} />
           {bars.map((bar, index) => (
             <Bar
               key={bar.dataKey}
@@ -227,6 +244,7 @@ export function BarChartWidget({
               name={bar.name}
               fill={bar.color || COLORS[index % COLORS.length]}
               radius={[4, 4, 0, 0]}
+              barSize={isVertical ? 20 : 32}
             />
           ))}
         </BarChart>
@@ -266,25 +284,17 @@ export function PieChartWidget({
             cy="50%"
             innerRadius={60}
             outerRadius={100}
-            paddingAngle={2}
+            paddingAngle={4}
             dataKey="value"
             label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-            labelLine={false}
+            stroke="none"
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-            }}
-            formatter={(value: number | undefined) => [value?.toLocaleString() ?? "", ""]}
-          />
-          {showLegend && <Legend />}
+          <Tooltip content={<CustomTooltip />} />
+          {showLegend && <Legend verticalAlign="bottom" align="center" iconType="circle" />}
         </PieChart>
       </ResponsiveContainer>
     </ChartContainer>
@@ -314,19 +324,12 @@ export function MultiLineChartWidget({
   return (
     <ChartContainer title={title} description={description}>
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9ca3af" />
-          <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-            }}
-          />
-          <Legend />
+        <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+          <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} dy={10} />
+          <YAxis tick={{ fontSize: 10, fill: '#7b7b8f' }} axisLine={false} tickLine={false} dx={-10} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px', fontSize: '11px', fontWeight: 'bold' }} />
           {lines.map((line, index) => (
             <Line
               key={line.dataKey}
@@ -334,8 +337,9 @@ export function MultiLineChartWidget({
               dataKey={line.dataKey}
               name={line.name}
               stroke={line.color || COLORS[index % COLORS.length]}
-              strokeWidth={2}
+              strokeWidth={3}
               dot={false}
+              activeDot={{ r: 6, strokeWidth: 0, fill: line.color || COLORS[index % COLORS.length] }}
             />
           ))}
         </LineChart>
@@ -344,4 +348,4 @@ export function MultiLineChartWidget({
   );
 }
 
-export { COLORS };
+export { COLORS };

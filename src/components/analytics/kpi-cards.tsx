@@ -20,7 +20,7 @@ export function KPICard({
   change,
   changeLabel,
   icon: Icon,
-  iconColor = "text-indigo-600",
+  iconColor = "text-violet-default",
   format = "number",
 }: KPICardProps) {
   const isPositive = change !== undefined && change > 0;
@@ -29,39 +29,41 @@ export function KPICard({
 
   const formattedValue = (() => {
     if (typeof value === "string") return value;
-    if (format === "currency") return `€${value.toLocaleString()}`;
+    if (format === "currency") return `${value.toLocaleString()} €`;
     if (format === "percent") return `${value}%`;
     return value.toLocaleString();
   })();
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div className="glass-surface p-6 rounded-2xl group hover:border-violet-default/30 transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
-        <div className={cn("p-2 rounded-lg bg-gray-50", iconColor)}>
+        <div className={cn("p-2.5 rounded-xl bg-violet-default/10 border border-violet-default/20 text-violet-default", iconColor)}>
           <Icon size={20} />
         </div>
         {change !== undefined && (
           <div
             className={cn(
-              "flex items-center gap-1 text-xs font-medium",
-              isPositive && "text-green-600",
-              isNegative && "text-red-600",
-              isNeutral && "text-gray-500"
+              "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+              isPositive && "bg-success/10 text-success border border-success/20",
+              isNegative && "bg-destructive/10 text-destructive border border-destructive/20",
+              isNeutral && "bg-white/5 text-text-tertiary border border-white/10"
             )}
           >
-            {isPositive && <TrendingUp size={14} />}
-            {isNegative && <TrendingDown size={14} />}
-            {isNeutral && <Minus size={14} />}
+            {isPositive && <TrendingUp size={12} />}
+            {isNegative && <TrendingDown size={12} />}
+            {isNeutral && <Minus size={12} />}
             {isPositive && "+"}
             {Math.abs(change).toFixed(1)}%
           </div>
         )}
       </div>
-      <p className="text-2xl font-bold text-gray-900">{formattedValue}</p>
-      <p className="text-sm text-gray-500 mt-1">
-        {title}
-        {changeLabel && <span className="text-gray-400 ml-1">({changeLabel})</span>}
-      </p>
+      <div>
+        <p className="text-xs font-bold text-text-tertiary uppercase tracking-[0.2em] mb-1">{title}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-bold text-text-primary font-heading tracking-tight">{formattedValue}</p>
+          {changeLabel && <span className="text-[10px] text-text-tertiary font-medium">{changeLabel}</span>}
+        </div>
+      </div>
     </div>
   );
 }
@@ -79,3 +81,4 @@ export function KPICardsGrid({ kpis }: KPICardsGridProps) {
     </div>
   );
 }
+

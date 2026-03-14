@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface CohortRow {
   cohortMonth: string;
@@ -14,29 +15,29 @@ interface CohortTableProps {
   description?: string;
 }
 
-export function CohortTable({ data, title = "Cohort Analysis", description = "Customer retention by signup month" }: CohortTableProps) {
-  const months = ["Month 0", "Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6", "Month 7", "Month 8", "Month 9", "Month 10", "Month 11"];
+export function CohortTable({ data, title = "Analyse de Cohorte", description = "Rétention client par mois d'inscription" }: CohortTableProps) {
+  const months = ["M0", "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11"];
 
   const getRetentionColor = (rate: number | null) => {
-    if (rate === null) return "bg-gray-50 text-gray-400";
-    if (rate >= 70) return "bg-green-100 text-green-700";
-    if (rate >= 50) return "bg-emerald-100 text-emerald-700";
-    if (rate >= 30) return "bg-yellow-100 text-yellow-700";
-    if (rate >= 10) return "bg-orange-100 text-orange-700";
-    return "bg-red-100 text-red-700";
+    if (rate === null) return "bg-white/2 text-text-tertiary opacity-20";
+    if (rate >= 70) return "bg-violet-default text-white shadow-[0_0_15px_rgba(147,23,253,0.3)]";
+    if (rate >= 50) return "bg-violet-default/70 text-white/90";
+    if (rate >= 30) return "bg-violet-default/40 text-text-primary";
+    if (rate >= 10) return "bg-violet-default/20 text-text-secondary";
+    return "bg-violet-default/5 text-text-tertiary";
   };
 
   if (!data || data.length === 0) {
     return (
-      <Card>
+      <Card className="glass-surface border-white/5 rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <CardTitle className="text-xl font-bold font-heading text-text-primary">{title}</CardTitle>
+          <CardDescription className="text-text-tertiary">{description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            <p>No cohort data available yet</p>
-            <p className="text-sm mt-1">Cohort analysis will appear once you have more customer data</p>
+          <div className="text-center py-12 bg-white/2 rounded-xl border border-dashed border-white/10">
+            <p className="text-sm text-text-secondary font-medium">Données de cohorte insuffisantes</p>
+            <p className="text-xs text-text-tertiary mt-2">L'analyse apparaîtra avec l'accumulation de données clients.</p>
           </div>
         </CardContent>
       </Card>
@@ -44,34 +45,37 @@ export function CohortTable({ data, title = "Cohort Analysis", description = "Cu
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+    <Card className="glass-surface border-white/5 rounded-2xl overflow-hidden">
+      <CardHeader className="pb-6">
+        <CardTitle className="text-xl font-bold font-heading text-text-primary">{title}</CardTitle>
+        <CardDescription className="text-text-tertiary">{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full border-separate border-spacing-1">
             <thead>
               <tr>
-                <th className="text-left font-semibold text-gray-600 p-2 border-b">Cohort</th>
-                <th className="text-center font-semibold text-gray-600 p-2 border-b">Customers</th>
+                <th className="text-left font-bold text-[10px] text-text-tertiary uppercase tracking-widest p-2">Cohorte</th>
+                <th className="text-center font-bold text-[10px] text-text-tertiary uppercase tracking-widest p-2 px-4">Clients</th>
                 {months.map((month, index) => (
-                  <th key={index} className="text-center font-semibold text-gray-600 p-2 border-b text-xs">
+                  <th key={index} className="text-center font-bold text-[10px] text-text-tertiary uppercase tracking-widest p-2">
                     {month}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {data.map((row, rowIndex) => (
-                <tr key={row.cohortMonth} className={rowIndex % 2 === 0 ? "bg-gray-50" : ""}>
-                  <td className="p-2 font-medium text-gray-900">{row.cohortMonth}</td>
-                  <td className="p-2 text-center font-medium text-gray-700">{row.customers}</td>
+              {data.map((row) => (
+                <tr key={row.cohortMonth}>
+                  <td className="p-2 py-3 text-xs font-bold text-text-primary border-t border-white/5">{row.cohortMonth}</td>
+                  <td className="p-2 py-3 text-center text-xs font-semibold text-text-secondary border-t border-white/5 bg-white/2 rounded-lg">{row.customers}</td>
                   {row.retentionRates.map((rate, colIndex) => (
-                    <td key={colIndex} className="p-1">
+                    <td key={colIndex} className="p-0.5">
                       <div
-                        className={`text-center py-1 px-2 rounded text-xs font-medium ${getRetentionColor(rate)}`}
+                        className={cn(
+                          "text-center py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-300 hover:scale-110 cursor-default",
+                          getRetentionColor(rate)
+                        )}
                       >
                         {rate !== null ? `${rate}%` : "-"}
                       </div>
@@ -82,15 +86,21 @@ export function CohortTable({ data, title = "Cohort Analysis", description = "Cu
             </tbody>
           </table>
         </div>
-        <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-          <span>Retention rate:</span>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded bg-green-100"></span>
-            <span>70%+</span>
-            <span className="w-4 h-4 rounded bg-yellow-100"></span>
-            <span>30-50%</span>
-            <span className="w-4 h-4 rounded bg-red-100"></span>
-            <span>&lt;10%</span>
+        <div className="mt-8 flex items-center gap-6 text-[10px] font-bold text-text-tertiary uppercase tracking-widest px-1">
+          <span>Légende Rétention :</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-violet-default shadow-[0_0_8px_rgba(147,23,253,0.4)]"></span>
+              <span>Légendaire (70%+)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-violet-default/40"></span>
+              <span>Solide (30-50%)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-violet-default/5 border border-white/5"></span>
+              <span>Faible (&lt;10%)</span>
+            </div>
           </div>
         </div>
       </CardContent>
@@ -98,42 +108,29 @@ export function CohortTable({ data, title = "Cohort Analysis", description = "Cu
   );
 }
 
-interface CohortHeatmapProps {
-  data: CohortRow[];
-}
-
-export function CohortHeatmap({ data }: CohortHeatmapProps) {
-  if (!data || data.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        <p>No cohort data available</p>
-      </div>
-    );
-  }
+export function CohortHeatmap({ data }: { data: CohortRow[] }) {
+  if (!data || data.length === 0) return null;
 
   const getHeatColor = (rate: number | null) => {
-    if (rate === null) return "bg-gray-100";
-    const intensity = Math.min(rate / 100, 1);
-    const hue = 145; // Green hue
-    const saturation = 70;
-    const lightness = 100 - intensity * 50;
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    if (rate === null) return "rgba(255, 255, 255, 0.02)";
+    const opacity = Math.min(Math.max(rate / 100, 0.05), 1);
+    return `rgba(147, 23, 253, ${opacity})`;
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {data.slice(0, 8).map((row) => (
-        <div key={row.cohortMonth} className="flex items-center gap-2">
-          <span className="text-xs text-gray-600 w-20">{row.cohortMonth}</span>
-          <div className="flex gap-1">
+        <div key={row.cohortMonth} className="flex items-center gap-3">
+          <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-tighter w-14">{row.cohortMonth}</span>
+          <div className="flex gap-1 flex-1">
             {row.retentionRates.slice(0, 12).map((rate, index) => (
               <div
                 key={index}
-                className="w-8 h-8 rounded flex items-center justify-center text-xs font-medium"
+                className="flex-1 aspect-square rounded-sm border border-white/5 flex items-center justify-center text-[8px] font-bold text-white transition-all hover:border-white/20"
                 style={{ backgroundColor: getHeatColor(rate) }}
-                title={`${row.cohortMonth} - Month ${index}: ${rate !== null ? `${rate}%` : "N/A"}`}
+                title={`${row.cohortMonth} - Mois ${index}: ${rate !== null ? `${rate}%` : "N/A"}`}
               >
-                {rate !== null ? rate : "-"}
+                {rate !== null && rate > 20 ? rate : ""}
               </div>
             ))}
           </div>
@@ -142,3 +139,4 @@ export function CohortHeatmap({ data }: CohortHeatmapProps) {
     </div>
   );
 }
+

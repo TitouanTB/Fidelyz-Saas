@@ -13,8 +13,10 @@ import {
   Repeat, 
   MessageSquare, 
   Gift, 
-  Clock 
+  Clock,
+  RefreshCw
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface JourneyPageClientProps {
   initialStats: JourneyStats[];
@@ -88,28 +90,30 @@ export function JourneyPageClient({ initialStats }: JourneyPageClientProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-12 max-w-7xl mx-auto pb-20">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Parcours Client</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Visualisez le parcours complet de vos clients
+          <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Parcours Client</h1>
+          <p className="text-text-secondary text-base mt-2">
+            Visualisez et optimisez le cycle de vie complet de vos membres.
           </p>
         </div>
-        <button
+        <Button
+          variant="outline"
           onClick={() => fetchStats()}
           disabled={isLoading}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          className="bg-white/5 border-white/10 hover:bg-white/10 text-text-primary gap-2"
         >
-          {isLoading ? "Chargement..." : "Actualiser"}
-        </button>
+          <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+          {isLoading ? "Chargement..." : "Actualiser les données"}
+        </Button>
       </div>
 
       {/* Desktop Timeline */}
       <div className="hidden lg:block">
-        <div className="relative">
+        <div className="relative pt-10 pb-20">
           {/* Connection Line */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2" />
+          <div className="absolute top-1/2 left-[5%] right-[5%] h-[2px] bg-gradient-to-r from-violet-default/20 via-violet-default/50 to-violet-default/20 -translate-y-1/2 blur-[0.5px]" />
           
           <div className="grid grid-cols-8 gap-4 relative">
             {JOURNEY_CONFIG.map((config, index) => {
@@ -117,7 +121,7 @@ export function JourneyPageClient({ initialStats }: JourneyPageClientProps) {
               const Icon = icons[config.stage];
               
               return (
-                <div key={config.stage} className="relative">
+                <div key={config.stage} className="relative z-10">
                   <JourneyBlock
                     config={config}
                     stat={stat}
@@ -134,7 +138,8 @@ export function JourneyPageClient({ initialStats }: JourneyPageClientProps) {
       </div>
 
       {/* Mobile Timeline */}
-      <div className="lg:hidden space-y-4">
+      <div className="lg:hidden space-y-6 relative">
+         <div className="absolute left-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-violet-default/50 to-transparent" />
         {JOURNEY_CONFIG.map((config, index) => {
           const stat = stats.find(s => s.stage === config.stage);
           const Icon = icons[config.stage];
@@ -155,9 +160,17 @@ export function JourneyPageClient({ initialStats }: JourneyPageClientProps) {
       </div>
 
       {/* Phone Preview */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Aperçu Mobile</h2>
-        <PhonePreview selectedStage={selectedStage} />
+      <div className="pt-8">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-violet-default/10 rounded-xl flex items-center justify-center">
+             <MessageSquare className="text-violet-default" size={20} />
+          </div>
+          <h2 className="text-xl font-bold font-heading text-text-primary">Aperçu de l'expérience membre</h2>
+        </div>
+        
+        <div className="glass-surface p-12 rounded-3xl border border-white/5 flex justify-center bg-[radial-gradient(circle_at_center,_var(--violet-glow)_0%,_transparent_70%)]">
+           <PhonePreview selectedStage={selectedStage} />
+        </div>
       </div>
 
       {/* Slide Over */}
@@ -175,3 +188,4 @@ export function JourneyPageClient({ initialStats }: JourneyPageClientProps) {
     </div>
   );
 }
+

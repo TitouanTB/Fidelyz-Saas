@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import {
   Gift,
   Check,
@@ -14,17 +17,19 @@ import {
   MessageCircle,
   Wallet,
   Sparkles,
+  Heart,
+  Smartphone,
+  UtensilsCrossed,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import Confetti from "react-confetti";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import confetti from "canvas-confetti";
 import { PWAInstallPrompt } from "./pwa-install-prompt";
-import { PushSubscriber } from "./push-subscriber";
 
 type Step = "A" | "B" | "C" | "D";
 
@@ -61,12 +66,10 @@ export function RewardFlow({
   googleReviewUrl,
 }: RewardFlowProps) {
   const [step, setStep] = useState<Step>("A");
-  const [showConfetti, setShowConfetti] = useState(false);
   const [showPWA, setShowPWA] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Form state
   const [formData, setFormData] = useState({
     firstName: "",
     phone: "",
@@ -75,36 +78,33 @@ export function RewardFlow({
     consent: false,
   });
 
-  // Review state
   const [reviewResponse, setReviewResponse] = useState<"positive" | "negative" | null>(null);
   const [feedback, setFeedback] = useState("");
-
-  // Result state
   const [claimResult, setClaimResult] = useState<{
     code?: string;
     customerToken?: string;
     customerId?: string;
   } | null>(null);
 
-  // Google Wallet link state
   const [googleWalletUrl, setGoogleWalletUrl] = useState<string | null>(null);
 
-  const primaryColor = organization.primaryColor || "#9317FD";
-
-  // Detect Android
   const isAndroid = typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
+  const primaryColor = organization.primaryColor || "#9317FD";
 
   useEffect(() => {
     if (step === "D") {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#9317FD", "#c77dff", "#ffffff"],
+      });
 
       const timer = setTimeout(() => setShowPWA(true), 3000);
       return () => clearTimeout(timer);
     }
   }, [step]);
 
-  // Generate Google Wallet URL when customer ID is available
   useEffect(() => {
     if (claimResult?.customerId && isAndroid && formData.channel === "wallet") {
       const fetchGoogleWalletUrl = async () => {
@@ -177,390 +177,322 @@ export function RewardFlow({
     }
   };
 
-  const progressPercent = step === "A" ? 25 : step === "B" ? 50 : step === "C" ? 75 : 100;
+  const stepDescription = {
+    A: "Offre exclusive",
+    B: "Votre avis",
+    C: "Activation",
+    D: "Terminé",
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ "--brand-primary": primaryColor } as React.CSSProperties}>
-      {showConfetti && (
-        <Confetti
-          width={typeof window !== "undefined" ? window.innerWidth : 0}
-          height={typeof window !== "undefined" ? window.innerHeight : 0}
-          recycle={false}
-        />
-      )}
+    <div className="min-h-screen bg-bg-base relative overflow-hidden flex flex-col items-center justify-center p-4">
+      {/* Background immersive layers */}
+      <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-violet-default/20 to-transparent pointer-events-none" />
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-violet-default/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-violet-default/5 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Header */}
-      <header
-        className="sticky top-0 z-50 py-4 px-4 shadow-sm"
-        style={{ backgroundColor: primaryColor }}
-      >
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      {/* Main Container */}
+      <div className="w-full max-w-md z-10">
+        {/* Logo / Org Name */}
+        <div className="flex flex-col items-center mb-8">
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 p-2 shadow-2xl backdrop-blur-xl"
+          >
             {organization.logoUrl ? (
-              <img
-                src={organization.logoUrl}
-                alt={organization.name}
-                className="w-10 h-10 rounded-lg object-cover bg-white/10"
-              />
+              <img src={organization.logoUrl} alt={organization.name} className="w-full h-full object-contain" />
             ) : (
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <Gift className="w-5 h-5 text-white" />
-              </div>
+              <UtensilsCrossed className="w-8 h-8 text-violet-default" />
             )}
-            <h1 className="text-lg font-bold text-white">{organization.name}</h1>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-2xl font-bold font-heading text-text-primary tracking-tight"
+          >
+            {organization.name}
+          </motion.h1>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+            <span className="text-xs text-text-tertiary uppercase tracking-widest font-medium">Programme Fidélité</span>
           </div>
         </div>
-      </header>
 
-      {/* Progress */}
-      <div className="bg-white border-b border-gray-200 py-3 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-            <span>Étape {step}</span>
-            <span>{progressPercent}%</span>
+        {/* Floating Glass Card */}
+        <div className="glass-surface shadow-[0_24px_48px_rgba(0,0,0,0.5)] rounded-3xl overflow-hidden min-h-[500px] flex flex-col">
+          {/* Progress Bar */}
+          <div className="bg-white/5 px-6 py-3 flex items-center justify-between border-b border-white/5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-tertiary">
+              {stepDescription[step]}
+            </span>
+            <div className="flex gap-1.5">
+              {(["A", "B", "C", "D"] as Step[]).map((s) => (
+                <div
+                  key={s}
+                  className={cn(
+                    "w-6 h-1 rounded-full transition-all duration-300",
+                    s === step ? "bg-violet-default w-12" : "bg-white/10"
+                  )}
+                />
+              ))}
+            </div>
           </div>
-          <Progress value={progressPercent} className="h-2" />
+
+          <div className="p-8 flex-1 flex flex-col">
+            <AnimatePresence mode="wait">
+              {/* Step A: Preview */}
+              {step === "A" && (
+                <motion.div
+                  key="step-a"
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="space-y-8 flex-1 flex flex-col"
+                >
+                  <div className="flex-1 flex flex-col justify-center text-center">
+                    <div className="inline-flex items-center justify-center w-20 h-20 mx-auto rounded-full bg-violet-default/10 border border-violet-default/20 mb-6 glow-violet">
+                      <Gift className="w-10 h-10 text-violet-default" />
+                    </div>
+                    <h2 className="text-3xl font-bold font-heading text-text-primary leading-tight mb-3">
+                      Cadeau de bienvenue offert !
+                    </h2>
+                    <p className="text-text-secondary">
+                      {reward?.name || "Votre première récompense vous attend chez nous."}
+                    </p>
+                    
+                    {reward?.description && (
+                      <div className="mt-6 px-4 py-3 bg-white/4 border border-white/5 rounded-2xl text-sm text-text-tertiary">
+                        {reward.description}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 text-sm text-text-secondary bg-violet-default/5 p-4 rounded-xl border border-violet-default/10">
+                      <Sparkles className="w-5 h-5 text-violet-default shrink-0" />
+                      <span>Incroyable ! Vous recevez directement <b>{loyaltyConfig?.welcomeBonus || 50} pts</b> après activation.</span>
+                    </div>
+
+                    <Button
+                      size="lg"
+                      className="w-full h-14 text-lg font-bold glow-violet"
+                      onClick={() => setStep("B")}
+                    >
+                      En profiter maintenant
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Step B: Feedback */}
+              {step === "B" && (
+                <motion.div
+                  key="step-b"
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="space-y-8 flex-1 flex flex-col justify-center"
+                >
+                  <div className="text-center">
+                    <Heart className="w-16 h-16 text-red-500 mx-auto mb-6 opacity-30 fill-red-500" />
+                    <h2 className="text-2xl font-bold font-heading text-text-primary mb-3">
+                      Un petit retour sur votre visite ?
+                    </h2>
+                    <p className="text-text-secondary">
+                      Votre avis est précieux pour nous aider à rester au top !
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => handleReviewResponse("positive")}
+                      className="flex flex-col items-center gap-4 p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-violet-default/10 hover:border-violet-default/30 transition-all group"
+                    >
+                      <span className="text-4xl group-hover:scale-125 transition-transform duration-300">😍</span>
+                      <span className="font-bold text-text-primary">Génial !</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleReviewResponse("negative")}
+                      className="flex flex-col items-center gap-4 p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group"
+                    >
+                      <span className="text-4xl group-hover:scale-125 transition-transform duration-300">😕</span>
+                      <span className="font-bold text-text-secondary">Moyen...</span>
+                    </button>
+                  </div>
+
+                  {reviewResponse === "negative" && (
+                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="space-y-4">
+                      <Textarea
+                        placeholder="Qu'est-ce qu'on peut améliorer ? (Privé)..."
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
+                        className="bg-white/4 border-white/10 h-32 rounded-2xl focus:border-violet-default/50"
+                      />
+                      <Button className="w-full h-14" onClick={() => setStep("C")}>
+                        Continuer
+                      </Button>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Step C: Form */}
+              {step === "C" && (
+                <motion.div
+                  key="step-c"
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="w-12 h-12 rounded-xl bg-violet-default/10 flex items-center justify-center border border-violet-default/20">
+                      <Smartphone className="w-6 h-6 text-violet-default" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-text-primary text-lg">Finalisez l'activation</h3>
+                      <p className="text-xs text-text-secondary">Presque fini !</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-widest text-text-tertiary">Votre Prénom</Label>
+                      <Input
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        placeholder="John"
+                        className="h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-widest text-text-tertiary">Numéro de Téléphone</Label>
+                      <div className="relative">
+                        <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                        <Input
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder="06 00 00 00 00"
+                          className="pl-12 h-12"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3 pt-2">
+                       <Label className="text-xs uppercase tracking-widest text-text-tertiary block">Recevoir ma carte sur :</Label>
+                       <div className="flex gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => setFormData({...formData, channel: 'email'})}
+                            className={cn("flex-1 p-4 rounded-2xl border transition-all flex flex-col items-center gap-2", 
+                              formData.channel === 'email' ? "bg-white/10 border-violet-default" : "bg-white/4 border-white/5 opacity-60")}
+                          >
+                            <Mail size={18} className={formData.channel === 'email' ? "text-violet-default" : ""} />
+                            <span className="text-[10px] font-bold">EMAIL</span>
+                          </button>
+                          {hasWhatsApp && (
+                            <button 
+                              type="button"
+                              onClick={() => setFormData({...formData, channel: 'whatsapp'})}
+                              className={cn("flex-1 p-4 rounded-2xl border transition-all flex flex-col items-center gap-2", 
+                                formData.channel === 'whatsapp' ? "bg-green-500/10 border-green-500/50" : "bg-white/4 border-white/5 opacity-60")}
+                            >
+                              <MessageCircle size={18} className={formData.channel === 'whatsapp' ? "text-green-500" : ""} />
+                              <span className="text-[10px] font-bold">WHATSAPP</span>
+                            </button>
+                          )}
+                       </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 mt-4">
+                      <Checkbox
+                        id="consent"
+                        checked={formData.consent}
+                        onCheckedChange={(c) => setFormData({ ...formData, consent: !!c })}
+                        className="mt-1 border-white/20 data-[state=checked]:bg-violet-default"
+                      />
+                      <label htmlFor="consent" className="text-[11px] text-text-secondary leading-tight cursor-pointer">
+                        J'accepte de rejoindre le programme de {organization.name} et de recevoir mes récompenses par message.
+                      </label>
+                    </div>
+
+                    {error && <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl">{error}</div>}
+
+                    <Button
+                      size="lg"
+                      className="w-full h-14 text-lg font-bold mt-4 glow-violet"
+                      disabled={isLoading}
+                      onClick={handleSubmit}
+                    >
+                      {isLoading ? "Envoi en cours..." : "C'est parti ! 🎉"}
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Step D: Done */}
+              {step === "D" && (
+                <motion.div
+                  key="step-d"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="space-y-8 flex-1 flex flex-col justify-center"
+                >
+                  <div className="text-center">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-success/20 rounded-full border border-success/30 flex items-center justify-center">
+                      <Check className="w-12 h-12 text-success" />
+                    </div>
+                    <h2 className="text-3xl font-bold font-heading text-text-primary mb-2">Bravo {formData.firstName} !</h2>
+                    <p className="text-text-secondary">Votre carte est maintenant active.</p>
+                  </div>
+
+                  {claimResult?.code && (
+                    <div className="p-8 rounded-[32px] bg-white/5 border border-white/10 text-center relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 w-full h-1 bg-violet-default shadow-[0_0_15px_rgba(147,23,253,0.5)]" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-text-tertiary block mb-4">Code à présenter en caisse</span>
+                      <div className="text-5xl font-mono font-bold text-text-primary tracking-widest group-hover:scale-110 transition-transform duration-500">
+                        {claimResult.code}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                     {isAndroid && googleWalletUrl && (
+                       <Button variant="secondary" className="w-full h-14 gap-4 bg-black border-white/10 hover:bg-white/20 transition-all" onClick={() => window.open(googleWalletUrl, '_blank')}>
+                         <Wallet size={20} />
+                         <span>Add to Google Wallet</span>
+                       </Button>
+                     )}
+                     
+                     <Link href={`/c/${claimResult?.customerToken || ''}`}>
+                        <Button variant="outline" className="w-full h-14 border-white/10 hover:bg-white/5">
+                           Voir mon espace client
+                        </Button>
+                     </Link>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          
+          {/* Footer brand */}
+          <div className="py-4 text-center border-t border-white/5 bg-black/20">
+             <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest">Powered by Fidelyz</span>
+          </div>
         </div>
+
+        {/* Support */}
+        <p className="mt-8 text-center text-xs text-text-tertiary">
+          Un problème ? <a href="#" className="underline hover:text-text-secondary">Besoins d'aide</a>
+        </p>
       </div>
 
-      {/* Content */}
-      <main className="max-w-md mx-auto px-4 py-8">
-        {/* Step A: Display Reward */}
-        {step === "A" && (
-          <div className="text-center space-y-6">
-            <div
-              className="w-20 h-20 mx-auto rounded-full flex items-center justify-center"
-              style={{ backgroundColor: primaryColor + "20" }}
-            >
-              <Gift className="w-10 h-10" style={{ color: primaryColor }} />
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {reward?.name || "Récompense de bienvenue"}
-              </h2>
-              {reward?.description && (
-                <p className="text-gray-600 mt-2">{reward.description}</p>
-              )}
-            </div>
-
-            {reward?.value && (
-              <Badge
-                className="text-lg px-4 py-2"
-                style={{ backgroundColor: primaryColor + "20", color: primaryColor }}
-              >
-                {reward.type === "DISCOUNT_PERCENT"
-                  ? `${reward.value}% de réduction`
-                  : `${reward.value}€ de valeur`}
-              </Badge>
-            )}
-
-            {reward?.conditions && (
-              <p className="text-sm text-gray-500 bg-gray-100 rounded-lg p-4">
-                {reward.conditions}
-              </p>
-            )}
-
-            {loyaltyConfig?.welcomeBonus !== undefined && loyaltyConfig.welcomeBonus > 0 && (
-              <p className="text-sm text-gray-600">
-                🎁 +{loyaltyConfig.welcomeBonus} points de bienvenue à l'inscription
-              </p>
-            )}
-
-            <Button
-              size="lg"
-              className="w-full"
-              style={{ backgroundColor: primaryColor }}
-              onClick={() => setStep("B")}
-            >
-              Obtenir ma récompense
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </Button>
-          </div>
-        )}
-
-        {/* Step B: Review Question */}
-        {step === "B" && (
-          <div className="text-center space-y-6">
-            <div
-              className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
-              style={{ backgroundColor: primaryColor + "20" }}
-            >
-              <MessageSquare className="w-8 h-8" style={{ color: primaryColor }} />
-            </div>
-
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Avez-vous apprécié votre visite chez {organization.name} ?
-              </h2>
-              <p className="text-gray-500 mt-2">Votre avis nous aide à nous améliorer</p>
-            </div>
-
-            <div className="flex gap-4 justify-center">
-              <Button
-                size="lg"
-                variant="outline"
-                className="flex-1 py-6 text-lg"
-                onClick={() => handleReviewResponse("positive")}
-              >
-                😊 Oui
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="flex-1 py-6 text-lg"
-                onClick={() => handleReviewResponse("negative")}
-              >
-                😕 Non
-              </Button>
-            </div>
-
-            {reviewResponse === "negative" && (
-              <div className="space-y-4 mt-6">
-                <p className="text-sm text-gray-600">
-                  Nous sommes désolés. Partagez votre feedback pour nous aider à nous améliorer :
-                </p>
-                <Textarea
-                  placeholder="Votre feedback (privé, ne sera pas publié)..."
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  rows={4}
-                />
-                <Button
-                  className="w-full"
-                  style={{ backgroundColor: primaryColor }}
-                  onClick={() => setStep("C")}
-                >
-                  Continuer
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Step C: Activation Form */}
-        {step === "C" && (
-          <div className="space-y-6">
-            <div className="text-center">
-              <div
-                className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"
-                style={{ backgroundColor: primaryColor + "20" }}
-              >
-                <User className="w-8 h-8" style={{ color: primaryColor }} />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900">Activez votre récompense</h2>
-              <p className="text-gray-500 mt-2">Complétez vos informations pour recevoir votre récompense</p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="firstName" className="flex items-center gap-1">
-                  Prénom <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  placeholder="Votre prénom"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="phone" className="flex items-center gap-1">
-                  Téléphone <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="06 12 34 56 78"
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="email">Email (optionnel)</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="votre@email.com"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>Comment souhaitez-vous recevoir votre récompense ?</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {hasWhatsApp && (
-                    <Button
-                      variant={formData.channel === "whatsapp" ? "default" : "outline"}
-                      className="justify-start"
-                      style={formData.channel === "whatsapp" ? { backgroundColor: "#25D366" } : {}}
-                      onClick={() => setFormData({ ...formData, channel: "whatsapp" })}
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      WhatsApp
-                    </Button>
-                  )}
-                  <Button
-                    variant={formData.channel === "email" ? "default" : "outline"}
-                    className="justify-start"
-                    style={formData.channel === "email" ? { backgroundColor: primaryColor } : {}}
-                    onClick={() => setFormData({ ...formData, channel: "email" })}
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Email
-                  </Button>
-                  {isAndroid && (
-                    <Button
-                      variant={formData.channel === "wallet" ? "default" : "outline"}
-                      className="justify-start col-span-2"
-                      style={formData.channel === "wallet" ? { backgroundColor: primaryColor } : {}}
-                      onClick={() => setFormData({ ...formData, channel: "wallet" })}
-                    >
-                      <Wallet className="w-4 h-4 mr-2" />
-                      Google Wallet
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="consent"
-                  checked={formData.consent}
-                  onCheckedChange={(checked) => setFormData({ ...formData, consent: !!checked })}
-                />
-                <Label htmlFor="consent" className="text-sm text-gray-600 leading-relaxed">
-                  J'accepte de recevoir des communications de {organization.name} et j'ai lu la{" "}
-                  <a href="/privacy" className="underline" style={{ color: primaryColor }}>
-                    politique de confidentialité
-                  </a>
-                  . <span className="text-red-500">*</span>
-                </Label>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500 bg-red-50 rounded-lg p-3">{error}</p>
-              )}
-
-              <Button
-                size="lg"
-                className="w-full"
-                style={{ backgroundColor: primaryColor }}
-                disabled={isLoading}
-                onClick={handleSubmit}
-              >
-                {isLoading ? (
-                  "Activation en cours..."
-                ) : (
-                  <>
-                    Activer ma récompense 🎉
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Step D: Confirmation */}
-        {step === "D" && (
-          <div className="text-center space-y-6">
-            <div className="animate-bounce">
-              <div
-                className="w-20 h-20 mx-auto rounded-full flex items-center justify-center"
-                style={{ backgroundColor: primaryColor }}
-              >
-                <Check className="w-10 h-10 text-white" />
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Félicitations ! 🎉</h2>
-              <p className="text-gray-600 mt-2">
-                Votre récompense est prête, {formData.firstName} !
-              </p>
-            </div>
-
-            {claimResult?.code && (
-              <div className="bg-gray-100 rounded-xl p-6">
-                <p className="text-sm text-gray-500 mb-2">Votre code de validation :</p>
-                <p className="text-3xl font-mono font-bold" style={{ color: primaryColor }}>
-                  {claimResult.code}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              {hasWhatsApp && organization.whatsappNumber && (
-                <Button
-                  size="lg"
-                  className="w-full bg-[#25D366] hover:bg-[#25D366]/90"
-                  onClick={() => {
-                    const message = encodeURIComponent(`FIDELYZ-${organization.slug}`);
-                    const cleanWhatsAppNumber = (organization.whatsappNumber || "").replace(/\D/g, "");
-                    window.open(`https://wa.me/${cleanWhatsAppNumber}?text=${message}`, "_blank");
-                  }}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Activer ma carte sur WhatsApp
-                </Button>
-              )}
-
-              {isAndroid && googleWalletUrl && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full"
-                  style={{ borderColor: primaryColor, color: primaryColor }}
-                  onClick={() => window.open(googleWalletUrl, "_blank")}
-                >
-                  <Wallet className="w-5 h-5 mr-2" />
-                  Ajouter à Google Wallet
-                </Button>
-              )}
-
-              {formData.email && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    // Email already sent, show confirmation
-                  }}
-                >
-                  <Mail className="w-5 h-5 mr-2" />
-                  Envoyé par email ✓
-                </Button>
-              )}
-
-              {claimResult?.customerToken && (
-                <a
-                  href={`/c/${claimResult.customerToken}`}
-                  className="block text-sm text-gray-500 hover:underline mt-4"
-                  style={{ color: primaryColor }}
-                >
-                  Voir ma page personnelle →
-                </a>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* PWA Install Prompt */}
-      {showPWA && <PWAInstallPrompt primaryColor={primaryColor} />}
+      <PWAInstallPrompt primaryColor={primaryColor} />
     </div>
   );
 }
